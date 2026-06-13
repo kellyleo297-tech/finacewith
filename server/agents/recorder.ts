@@ -1,5 +1,5 @@
-import { callLLM } from '../config';
-import type { AgentContext, AgentResponse, ExpenseRecord } from '../types';
+import { callLLM } from '../config.js';
+import type { AgentContext, AgentResponse, ExpenseRecord } from '../types.js';
 
 const SYSTEM_PROMPT = `你是 MoneyMate 的记账 Agent，负责从自然语言中提取消费记录。
 

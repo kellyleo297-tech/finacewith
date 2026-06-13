@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supervisorAgent } from '../server/agents/supervisor';
-import { recorderAgent } from '../server/agents/recorder';
-import { analyzerAgent } from '../server/agents/analyzer';
-import { budgeterAgent } from '../server/agents/budgeter';
-import { saverAgent } from '../server/agents/saver';
-import { educatorAgent } from '../server/agents/educator';
-import { complianceAgent } from '../server/agents/compliance';
-import type { AgentContext } from '../server/types';
+import { supervisorAgent } from '../server/agents/supervisor.js';
+import { recorderAgent } from '../server/agents/recorder.js';
+import { analyzerAgent } from '../server/agents/analyzer.js';
+import { budgeterAgent } from '../server/agents/budgeter.js';
+import { saverAgent } from '../server/agents/saver.js';
+import { educatorAgent } from '../server/agents/educator.js';
+import { complianceAgent } from '../server/agents/compliance.js';
+import type { AgentContext } from '../server/types.js';
 
 // ── Mock data context (same as Express server) ─────────
 function getContext(): AgentContext {

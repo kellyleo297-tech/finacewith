@@ -1,4 +1,4 @@
-import { callLLM } from '../config';
+import { callLLM } from '../config.js';
 
 const SYSTEM_PROMPT = `你是 MoneyMate 的风控合规 Agent，负责检查 AI 回答是否安全合规。
 

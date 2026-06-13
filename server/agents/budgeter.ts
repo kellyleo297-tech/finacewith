@@ -1,5 +1,5 @@
-import { callLLM } from '../config';
-import type { AgentContext, AgentResponse } from '../types';
+import { callLLM } from '../config.js';
+import type { AgentContext, AgentResponse } from '../types.js';
 
 export async function budgeterAgent(
   userMessage: string,

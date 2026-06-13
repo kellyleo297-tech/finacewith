@@ -1,4 +1,4 @@
-import { callLLM } from '../config';
+import { callLLM } from '../config.js';
 
 const SYSTEM_PROMPT = `你是 MoneyMate AI 的 Supervisor Agent（调度中心）。
 
