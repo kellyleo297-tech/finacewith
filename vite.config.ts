@@ -6,10 +6,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   base: process.env.VERCEL ? '/' : '/finacewith/',
   server: {
-    proxy: {
-      '/api': process.env.VERCEL
-        ? undefined
-        : 'http://localhost:3001',
-    },
+    ...(process.env.VERCEL
+      ? {}
+      : { proxy: { '/api': 'http://localhost:3001' } }),
   },
 })
