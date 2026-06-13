@@ -4,10 +4,12 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/finacewith/',
+  base: process.env.VERCEL ? '/' : '/finacewith/',
   server: {
     proxy: {
-      '/api': 'http://localhost:3001',
+      '/api': process.env.VERCEL
+        ? undefined
+        : 'http://localhost:3001',
     },
   },
 })
