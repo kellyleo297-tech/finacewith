@@ -5,7 +5,7 @@ import { QUICK_QUESTIONS } from '../data/mockData';
 import type { Conversation } from '../types';
 
 export default function AIAssistant() {
-  const { state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, categoryBudgetUsage, savingProgress, addConversation } = useApp();
+  const { state, addConversation } = useApp();
   const [input, setInput] = useState('');
   const [isThinking, setIsThinking] = useState(false);
   const [messages, setMessages] = useState<Array<{ role: 'user' | 'assistant'; content: string; agentUsed?: string; intent?: string }>>([
