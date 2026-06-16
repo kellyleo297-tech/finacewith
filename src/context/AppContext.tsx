@@ -201,6 +201,7 @@ interface AppContextValue {
   totalBudget: number;
   // Actions
   addExpense: (expense: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => void;
+  addMultipleExpenses: (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => void;
   deleteExpense: (id: string) => void;
   updateBudget: (categoryId: string, amount: number, alertThreshold?: number) => void;
   addConversation: (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => void;
@@ -285,6 +286,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
   }, [state.user.id]);
 
+  const addMultipleExpenses = useCallback((expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => {
+    expenses.forEach(exp => {
+      const newExpense: Expense = {
+        ...exp,
+        id: `exp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        userId: state.user.id,
+        createdAt: new Date().toISOString(),
+      };
+      dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
+    });
+    setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
+  }, [state.user.id]);
+
   const deleteExpense = useCallback((id: string) => {
     dispatch({ type: 'DELETE_EXPENSE', payload: id });
     setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
@@ -332,6 +346,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     categoryBudgetUsage,
     totalBudget,
     addExpense,
+    addMultipleExpenses,
     deleteExpense,
     updateBudget,
     addConversation,
@@ -340,7 +355,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }), [
     state, monthlyIncome, monthlyExpenses, remainingBudget,
     todaySuggested, savingProgress, categorySpending, categoryBudgetUsage,
-    totalBudget, addExpense, deleteExpense, updateBudget,
+    totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget,
     addConversation, markAlertRead, updateUser,
   ]);
 
