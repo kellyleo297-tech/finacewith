@@ -26,3 +26,6 @@ dist-ssr
 # Environment
 .env
 .env.local
+
+# Local documents
+INTERVIEW_QA.md
