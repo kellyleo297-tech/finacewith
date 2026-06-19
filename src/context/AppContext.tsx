@@ -1,363 +1,250 @@
-import React, { createContext, useContext, useReducer, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { User, Expense, Income, Budget, SavingGoal, Alert, Category, Conversation } from '../types';
-import {
-  DEFAULT_USER, DEFAULT_CATEGORIES, MOCK_EXPENSES, MOCK_INCOMES,
-  MOCK_BUDGETS, MOCK_SAVING_GOALS, MOCK_ALERTS, MOCK_EXPENSES_LAST_MONTH,
-} from '../data/mockData';
+import { supabase, type DbExpense, type DbIncome, type DbBudget, type DbSavingGoal } from '../lib/supabase';
+
+const currentMonth = () => `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+
+// ── Default categories seeded on user creation ─────────
+const CATEGORY_SEED = [
+  { cat_key: 'cat_food', name: '饮食', type: 'expense', icon: '🍽️', is_default: true },
+  { cat_key: 'cat_transport', name: '交通', type: 'expense', icon: '🚗', is_default: true },
+  { cat_key: 'cat_entertainment', name: '娱乐', type: 'expense', icon: '🎮', is_default: true },
+  { cat_key: 'cat_shopping', name: '购物', type: 'expense', icon: '🛍️', is_default: true },
+  { cat_key: 'cat_learning', name: '学习', type: 'expense', icon: '📚', is_default: true },
+  { cat_key: 'cat_rent', name: '房租', type: 'expense', icon: '🏠', is_default: true },
+  { cat_key: 'cat_medical', name: '医疗', type: 'expense', icon: '💊', is_default: true },
+  { cat_key: 'cat_social', name: '人情社交', type: 'expense', icon: '🎁', is_default: true },
+  { cat_key: 'cat_investment', name: '投资理财', type: 'expense', icon: '📈', is_default: true },
+  { cat_key: 'cat_other', name: '其他', type: 'expense', icon: '📦', is_default: true },
+];
 
 // ── State ──────────────────────────────────────────────
 interface AppState {
   user: User;
   expenses: Expense[];
-  expensesLastMonth: Expense[];
   incomes: Income[];
   budgets: Budget[];
   savingGoals: SavingGoal[];
   alerts: Alert[];
   categories: Category[];
   conversations: Conversation[];
+  loading: boolean;
+  error: string | null;
 }
 
-const initialState: AppState = {
-  user: DEFAULT_USER,
-  expenses: MOCK_EXPENSES,
-  expensesLastMonth: MOCK_EXPENSES_LAST_MONTH,
-  incomes: MOCK_INCOMES,
-  budgets: MOCK_BUDGETS,
-  savingGoals: MOCK_SAVING_GOALS,
-  alerts: MOCK_ALERTS,
-  categories: DEFAULT_CATEGORIES,
-  conversations: [],
+const emptyUser: User = {
+  id: '', name: '', role: 'worker', currency: 'CNY', riskLevel: '',
+  monthlyIncome: 0, incomeSource: '', budgetMode: 'balanced', savingGoal: 0,
+  fixedExpenses: [], createdAt: '', isOnboarded: false,
 };
 
-// ── Actions ────────────────────────────────────────────
-type Action =
-  | { type: 'SET_USER'; payload: Partial<User> }
-  | { type: 'ADD_EXPENSE'; payload: Expense }
-  | { type: 'DELETE_EXPENSE'; payload: string }
-  | { type: 'ADD_INCOME'; payload: Income }
-  | { type: 'UPDATE_BUDGET'; payload: { categoryId: string; amount: number; alertThreshold?: number } }
-  | { type: 'UPDATE_SAVING_GOAL'; payload: SavingGoal }
-  | { type: 'ADD_SAVING_GOAL'; payload: SavingGoal }
-  | { type: 'MARK_ALERT_READ'; payload: string }
-  | { type: 'ADD_ALERT'; payload: Alert }
-  | { type: 'ADD_CONVERSATION'; payload: Conversation }
-  | { type: 'ADD_CATEGORY'; payload: Category }
-  | { type: 'DELETE_CATEGORY'; payload: string }
-  | { type: 'RECALCULATE_ALERTS' };
+const initialState: AppState = {
+  user: emptyUser,
+  expenses: [], incomes: [], budgets: [], savingGoals: [],
+  alerts: [], categories: CATEGORY_SEED.map(c => ({ id: c.cat_key, name: c.name, type: 'expense' as const, icon: c.icon, isDefault: c.is_default })), conversations: [],
+  loading: true, error: null,
+};
 
-function reducer(state: AppState, action: Action): AppState {
-  switch (action.type) {
-    case 'SET_USER':
-      return { ...state, user: { ...state.user, ...action.payload } };
-
-    case 'ADD_EXPENSE':
-      return { ...state, expenses: [action.payload, ...state.expenses] };
-
-    case 'DELETE_EXPENSE':
-      return { ...state, expenses: state.expenses.filter(e => e.id !== action.payload) };
-
-    case 'ADD_INCOME':
-      return { ...state, incomes: [...state.incomes, action.payload] };
-
-    case 'UPDATE_BUDGET': {
-      const budgets = state.budgets.map(b =>
-        b.categoryId === action.payload.categoryId
-          ? { ...b, amount: action.payload.amount, alertThreshold: action.payload.alertThreshold ?? b.alertThreshold }
-          : b
-      );
-      return { ...state, budgets };
-    }
-
-    case 'UPDATE_SAVING_GOAL': {
-      const goals = state.savingGoals.map(g =>
-        g.id === action.payload.id ? action.payload : g
-      );
-      return { ...state, savingGoals: goals };
-    }
-
-    case 'ADD_SAVING_GOAL':
-      return { ...state, savingGoals: [...state.savingGoals, action.payload] };
-
-    case 'MARK_ALERT_READ':
-      return {
-        ...state,
-        alerts: state.alerts.map(a =>
-          a.id === action.payload ? { ...a, read: true } : a
-        ),
-      };
-
-    case 'ADD_ALERT':
-      return { ...state, alerts: [action.payload, ...state.alerts] };
-
-    case 'ADD_CONVERSATION':
-      return { ...state, conversations: [...state.conversations, action.payload] };
-
-    case 'ADD_CATEGORY':
-      return { ...state, categories: [...state.categories, action.payload] };
-
-    case 'DELETE_CATEGORY':
-      return { ...state, categories: state.categories.filter(c => c.id !== action.payload) };
-
-    case 'RECALCULATE_ALERTS': {
-      // Recalculate alerts based on current budget usage
-      const newAlerts: Alert[] = [];
-      const now = new Date().toISOString();
-      const currentMonth = '2026-06';
-
-      state.budgets.forEach(budget => {
-        const catExpenses = state.expenses.filter(
-          e => e.categoryId === budget.categoryId && e.expenseDate.startsWith(currentMonth)
-        );
-        const spent = catExpenses.reduce((sum, e) => sum + e.amount, 0);
-        const usagePercent = budget.amount > 0 ? Math.round((spent / budget.amount) * 100) : 0;
-        const category = state.categories.find(c => c.id === budget.categoryId);
-
-        if (usagePercent >= 100) {
-          newAlerts.push({
-            id: `alert_${budget.categoryId}_overspent`,
-            type: 'danger',
-            message: `${category?.name || '未知'}预算已超支！本月预算 ${budget.amount} 元，已支出 ${spent} 元。`,
-            categoryId: budget.categoryId,
-            threshold: 100,
-            currentUsage: usagePercent,
-            createdAt: now,
-            read: false,
-          });
-        } else if (usagePercent >= budget.alertThreshold) {
-          newAlerts.push({
-            id: `alert_${budget.categoryId}_warning`,
-            type: 'warning',
-            message: `${category?.name || '未知'}预算已使用 ${usagePercent}%，本月还剩 ${budget.amount - spent} 元。`,
-            categoryId: budget.categoryId,
-            threshold: budget.alertThreshold,
-            currentUsage: usagePercent,
-            createdAt: now,
-            read: false,
-          });
-        }
-      });
-
-      // Check total budget
-      const totalBudget = state.budgets.reduce((s, b) => s + b.amount, 0);
-      const totalSpent = state.expenses
-        .filter(e => e.expenseDate.startsWith(currentMonth))
-        .reduce((s, e) => s + e.amount, 0);
-      const totalUsage = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0;
-
-      if (totalUsage >= 90) {
-        newAlerts.push({
-          id: 'alert_total_warning',
-          type: 'warning',
-          message: `本月总预算已使用 ${totalUsage}%，建议进入省钱模式。`,
-          threshold: 90,
-          currentUsage: totalUsage,
-          createdAt: now,
-          read: false,
-        });
-      }
-
-      // Check saving goal risk
-      const remainingDays = Math.max(1, 30 - new Date().getDate());
-      const dailySpend = remainingDays > 0 ? totalSpent / (new Date().getDate() || 1) : totalSpent;
-      const projectedTotal = totalSpent + dailySpend * remainingDays;
-      const income = state.incomes
-        .filter(i => i.month === currentMonth)
-        .reduce((s, i) => s + i.amount, 0);
-      const projectedSaving = income - projectedTotal;
-
-      if (state.user.savingGoal > 0 && projectedSaving < state.user.savingGoal) {
-        newAlerts.push({
-          id: 'alert_saving_risk',
-          type: 'info',
-          message: `按当前支出速度，本月储蓄目标 ${state.user.savingGoal} 元可能无法完成。建议减少弹性支出。`,
-          threshold: 90,
-          currentUsage: Math.round((projectedSaving / state.user.savingGoal) * 100),
-          createdAt: now,
-          read: false,
-        });
-      }
-
-      return { ...state, alerts: newAlerts };
-    }
-
-    default:
-      return state;
-  }
+// ── Helpers: map DB rows to app types ──────────────────
+function toExpense(db: DbExpense): Expense {
+  return { id: db.id, userId: db.user_id, amount: db.amount, categoryId: db.category_id, note: db.note, paymentMethod: db.payment_method as Expense['paymentMethod'], expenseDate: db.expense_date, createdAt: db.created_at };
+}
+function toIncome(db: DbIncome): Income {
+  return { id: db.id, userId: db.user_id, amount: db.amount, source: db.source, incomeDate: db.income_date, month: db.month, isRecurring: db.is_recurring, note: db.note };
+}
+function toBudget(db: DbBudget): Budget {
+  return { id: db.id, userId: db.user_id, categoryId: db.category_id, amount: db.amount, month: db.month, alertThreshold: db.alert_threshold };
+}
+function toSavingGoal(db: DbSavingGoal): SavingGoal {
+  return { id: db.id, userId: db.user_id, name: db.name, targetAmount: db.target_amount, currentAmount: db.current_amount, deadline: db.deadline, status: db.status as SavingGoal['status'], createdAt: db.created_at };
 }
 
 // ── Context ────────────────────────────────────────────
 interface AppContextValue {
   state: AppState;
-  dispatch: React.Dispatch<Action>;
-  // Computed values
   monthlyIncome: number;
   monthlyExpenses: number;
   remainingBudget: number;
   todaySuggested: number;
   savingProgress: number;
-  categorySpending: Map<string, number>;
   categoryBudgetUsage: { categoryId: string; name: string; spent: number; budget: number; usage: number }[];
   totalBudget: number;
-  // Actions
-  addExpense: (expense: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => void;
-  addMultipleExpenses: (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => void;
-  deleteExpense: (id: string) => void;
-  updateBudget: (categoryId: string, amount: number, alertThreshold?: number) => void;
-  addConversation: (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => void;
+  addExpense: (expense: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => Promise<void>;
+  addMultipleExpenses: (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => Promise<void>;
+  deleteExpense: (id: string) => Promise<void>;
+  updateBudget: (categoryId: string, amount: number, alertThreshold?: number) => Promise<void>;
+  addConversation: (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => Promise<void>;
   markAlertRead: (id: string) => void;
   updateUser: (user: Partial<User>) => void;
+  createUser: (name: string, role: string) => Promise<void>;
+  loadUserData: (userId: string) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const currentMonth = '2026-06';
+  const [state, setState] = useState<AppState>(initialState);
+  const month = currentMonth();
+
+  // ── On mount: try to restore session ─────────────────
+  useEffect(() => {
+    const savedUserId = localStorage.getItem('moneymate_user_id');
+    if (savedUserId) {
+      loadUserData(savedUserId);
+    } else {
+      setState(prev => ({ ...prev, loading: false }));
+    }
+  }, []);
+
+  const loadUserData = useCallback(async (userId: string) => {
+    setState(prev => ({ ...prev, loading: true }));
+    try {
+      // Fetch user
+      const { data: userData } = await supabase.from('users').select('*').eq('id', userId).single();
+      if (!userData) { setState(prev => ({ ...prev, loading: false })); return; }
+
+      const user: User = {
+        id: userData.id, name: userData.name, role: userData.role,
+        currency: userData.currency, riskLevel: userData.risk_level || '',
+        monthlyIncome: userData.monthly_income, incomeSource: userData.income_source || '',
+        budgetMode: userData.budget_mode || 'balanced', savingGoal: userData.saving_goal || 0,
+        fixedExpenses: [], createdAt: userData.created_at, isOnboarded: true,
+      };
+
+      // Fetch expenses this month
+      const { data: expData } = await supabase.from('expenses').select('*').eq('user_id', userId).gte('expense_date', `${month}-01`).order('created_at', { ascending: false });
+      const expenses = (expData || []).map(toExpense);
+
+      // Fetch incomes this month
+      const { data: incData } = await supabase.from('incomes').select('*').eq('user_id', userId).eq('month', month);
+      const incomes = (incData || []).map(toIncome);
+
+      // Fetch budgets this month
+      const { data: budData } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('month', month);
+      const budgets = (budData || []).map(toBudget);
+
+      // Fetch saving goals
+      const { data: goalData } = await supabase.from('saving_goals').select('*').eq('user_id', userId);
+      const savingGoals = (goalData || []).map(toSavingGoal);
+
+      // Build categories list from seed
+      const categories: Category[] = CATEGORY_SEED.map(c => ({ id: c.cat_key, name: c.name, type: c.type as 'expense', icon: c.icon, isDefault: c.is_default }));
+
+      setState(prev => ({ ...prev, user, expenses, incomes, budgets, savingGoals, categories, loading: false }));
+    } catch (e) {
+      console.error('loadUserData error', e);
+      setState(prev => ({ ...prev, loading: false, error: '加载数据失败' }));
+    }
+  }, [month]);
+
+  const createUser = useCallback(async (name: string, role: string) => {
+    const { data } = await supabase.from('users').insert({ name, role }).select().single();
+    if (data) {
+      localStorage.setItem('moneymate_user_id', data.id);
+      // Seed default categories & budgets
+      const catInserts = CATEGORY_SEED.map(c => ({ user_id: data.id, ...c }));
+      await supabase.from('categories').insert(catInserts);
+      // Seed default budgets
+      const defaultBudgets = [
+        { user_id: data.id, category_id: 'cat_food', amount: 1800, month, alert_threshold: 70 },
+        { user_id: data.id, category_id: 'cat_transport', amount: 500, month, alert_threshold: 80 },
+        { user_id: data.id, category_id: 'cat_entertainment', amount: 600, month, alert_threshold: 70 },
+        { user_id: data.id, category_id: 'cat_shopping', amount: 800, month, alert_threshold: 70 },
+        { user_id: data.id, category_id: 'cat_learning', amount: 500, month, alert_threshold: 80 },
+        { user_id: data.id, category_id: 'cat_social', amount: 400, month, alert_threshold: 70 },
+        { user_id: data.id, category_id: 'cat_medical', amount: 300, month, alert_threshold: 80 },
+        { user_id: data.id, category_id: 'cat_other', amount: 300, month, alert_threshold: 80 },
+      ];
+      await supabase.from('budgets').insert(defaultBudgets);
+      await loadUserData(data.id);
+    }
+  }, [month, loadUserData]);
 
   // ── Computed values ──────────────────────────────────
-  const monthlyIncome = useMemo(() =>
-    state.incomes
-      .filter(i => i.month === currentMonth)
-      .reduce((s, i) => s + i.amount, 0),
-    [state.incomes, currentMonth]
-  );
-
-  const monthlyExpenses = useMemo(() =>
-    state.expenses
-      .filter(e => e.expenseDate.startsWith(currentMonth))
-      .reduce((s, e) => s + e.amount, 0),
-    [state.expenses, currentMonth]
-  );
-
-  const totalBudget = useMemo(() =>
-    state.budgets.reduce((s, b) => s + b.amount, 0),
-    [state.budgets]
-  );
-
+  const monthlyIncome = useMemo(() => state.incomes.reduce((s, i) => s + i.amount, 0) || state.user.monthlyIncome, [state.incomes, state.user.monthlyIncome]);
+  const monthlyExpenses = useMemo(() => state.expenses.filter(e => e.expenseDate.startsWith(month)).reduce((s, e) => s + e.amount, 0), [state.expenses, month]);
+  const totalBudget = useMemo(() => state.budgets.reduce((s, b) => s + b.amount, 0), [state.budgets]);
   const remainingBudget = totalBudget - monthlyExpenses;
-
-  const todaySuggested = useMemo(() => {
-    const remainingDays = Math.max(1, 30 - new Date().getDate());
-    return Math.max(0, Math.round(remainingBudget / remainingDays));
-  }, [remainingBudget]);
-
+  const todaySuggested = useMemo(() => Math.max(0, Math.round(remainingBudget / Math.max(1, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate()))), [remainingBudget]);
   const savingProgress = useMemo(() => {
     const goal = state.savingGoals.find(g => g.status === 'active');
-    if (!goal) return 0;
-    return Math.round((goal.currentAmount / goal.targetAmount) * 100);
+    return goal ? Math.round((goal.currentAmount / goal.targetAmount) * 100) : 0;
   }, [state.savingGoals]);
 
   const categorySpending = useMemo(() => {
     const map = new Map<string, number>();
-    state.expenses
-      .filter(e => e.expenseDate.startsWith(currentMonth))
-      .forEach(e => {
-        map.set(e.categoryId, (map.get(e.categoryId) || 0) + e.amount);
-      });
+    state.expenses.filter(e => e.expenseDate.startsWith(month)).forEach(e => map.set(e.categoryId, (map.get(e.categoryId) || 0) + e.amount));
     return map;
-  }, [state.expenses, currentMonth]);
+  }, [state.expenses, month]);
 
   const categoryBudgetUsage = useMemo(() =>
     state.budgets.map(b => {
       const spent = categorySpending.get(b.categoryId) || 0;
       const cat = state.categories.find(c => c.id === b.categoryId);
-      return {
-        categoryId: b.categoryId,
-        name: cat?.name || '未知',
-        spent,
-        budget: b.amount,
-        usage: b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0,
-      };
+      return { categoryId: b.categoryId, name: cat?.name || b.categoryId, spent, budget: b.amount, usage: b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0 };
     }).sort((a, b) => b.usage - a.usage),
     [state.budgets, categorySpending, state.categories]
   );
 
-  // ── Action helpers ───────────────────────────────────
-  const addExpense = useCallback((expense: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => {
-    const newExpense: Expense = {
-      ...expense,
-      id: `exp_${Date.now()}`,
-      userId: state.user.id,
-      createdAt: new Date().toISOString(),
-    };
-    dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
-    // Recalculate alerts after adding expense
-    setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
+  // ── Actions ──────────────────────────────────────────
+  const addExpense = useCallback(async (exp: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => {
+    const { data } = await supabase.from('expenses').insert({
+      user_id: state.user.id, amount: exp.amount, category_id: exp.categoryId,
+      note: exp.note, payment_method: exp.paymentMethod, expense_date: exp.expenseDate,
+    }).select().single();
+    if (data) setState(prev => ({ ...prev, expenses: [toExpense(data), ...prev.expenses] }));
   }, [state.user.id]);
 
-  const addMultipleExpenses = useCallback((expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => {
-    expenses.forEach(exp => {
-      const newExpense: Expense = {
-        ...exp,
-        id: `exp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-        userId: state.user.id,
-        createdAt: new Date().toISOString(),
-      };
-      dispatch({ type: 'ADD_EXPENSE', payload: newExpense });
-    });
-    setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
+  const addMultipleExpenses = useCallback(async (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => {
+    const rows = expenses.map(e => ({
+      user_id: state.user.id, amount: e.amount, category_id: e.categoryId,
+      note: e.note, payment_method: e.paymentMethod, expense_date: e.expenseDate,
+    }));
+    const { data } = await supabase.from('expenses').insert(rows).select();
+    if (data) setState(prev => ({ ...prev, expenses: [...data.map(toExpense), ...prev.expenses] }));
   }, [state.user.id]);
 
-  const deleteExpense = useCallback((id: string) => {
-    dispatch({ type: 'DELETE_EXPENSE', payload: id });
-    setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
+  const deleteExpense = useCallback(async (id: string) => {
+    await supabase.from('expenses').delete().eq('id', id);
+    setState(prev => ({ ...prev, expenses: prev.expenses.filter(e => e.id !== id) }));
   }, []);
 
-  const updateBudget = useCallback((categoryId: string, amount: number, alertThreshold?: number) => {
-    dispatch({ type: 'UPDATE_BUDGET', payload: { categoryId, amount, alertThreshold } });
-    setTimeout(() => dispatch({ type: 'RECALCULATE_ALERTS' }), 100);
-  }, []);
+  const updateBudget = useCallback(async (categoryId: string, amount: number, alertThreshold?: number) => {
+    const existing = state.budgets.find(b => b.categoryId === categoryId && b.month === month);
+    if (existing) {
+      await supabase.from('budgets').update({ amount, alert_threshold: alertThreshold ?? existing.alertThreshold }).eq('id', existing.id);
+    } else {
+      await supabase.from('budgets').insert({ user_id: state.user.id, category_id: categoryId, amount, month, alert_threshold: alertThreshold ?? 70 });
+    }
+    setState(prev => ({
+      ...prev,
+      budgets: prev.budgets.map(b => b.categoryId === categoryId ? { ...b, amount, alertThreshold: alertThreshold ?? b.alertThreshold } : b),
+    }));
+  }, [state.user.id, state.budgets, month]);
 
-  const addConversation = useCallback((
-    question: string, answer: string, intent: Conversation['intent'], agentUsed: string
-  ) => {
-    dispatch({
-      type: 'ADD_CONVERSATION',
-      payload: {
-        id: `conv_${Date.now()}`,
-        userId: state.user.id,
-        question,
-        answer,
-        intent,
-        agentUsed,
-        createdAt: new Date().toISOString(),
-      },
-    });
+  const addConversation = useCallback(async (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => {
+    const { data } = await supabase.from('conversations').insert({
+      user_id: state.user.id, question, answer, intent, agent_used: agentUsed,
+    }).select().single();
+    if (data) {
+      setState(prev => ({ ...prev, conversations: [...prev.conversations, { id: data.id, userId: data.user_id, question: data.question, answer: data.answer, intent: data.intent, agentUsed: data.agent_used, createdAt: data.created_at }] }));
+    }
   }, [state.user.id]);
 
   const markAlertRead = useCallback((id: string) => {
-    dispatch({ type: 'MARK_ALERT_READ', payload: id });
+    setState(prev => ({ ...prev, alerts: prev.alerts.map(a => a.id === id ? { ...a, read: true } : a) }));
   }, []);
 
-  const updateUser = useCallback((user: Partial<User>) => {
-    dispatch({ type: 'SET_USER', payload: user });
+  const updateUser = useCallback((_user: Partial<User>) => {
+    setState(prev => ({ ...prev, user: { ...prev.user, ..._user } }));
   }, []);
 
   const value = useMemo(() => ({
-    state,
-    dispatch,
-    monthlyIncome,
-    monthlyExpenses,
-    remainingBudget,
-    todaySuggested,
-    savingProgress,
-    categorySpending,
-    categoryBudgetUsage,
-    totalBudget,
-    addExpense,
-    addMultipleExpenses,
-    deleteExpense,
-    updateBudget,
-    addConversation,
-    markAlertRead,
-    updateUser,
-  }), [
-    state, monthlyIncome, monthlyExpenses, remainingBudget,
-    todaySuggested, savingProgress, categorySpending, categoryBudgetUsage,
-    totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget,
-    addConversation, markAlertRead, updateUser,
-  ]);
+    state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested,
+    savingProgress, categoryBudgetUsage, totalBudget,
+    addExpense, addMultipleExpenses, deleteExpense, updateBudget,
+    addConversation, markAlertRead, updateUser, createUser, loadUserData,
+  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, loadUserData]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

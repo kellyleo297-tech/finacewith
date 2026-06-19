@@ -73,21 +73,15 @@ export default function Statistics() {
       .filter(e => e.expenseDate.startsWith(currentMonth))
       .forEach(e => thisByCat.set(e.categoryId, (thisByCat.get(e.categoryId) || 0) + e.amount));
 
-    const lastByCat = new Map<string, number>();
-    state.expensesLastMonth
-      .forEach(e => lastByCat.set(e.categoryId, (lastByCat.get(e.categoryId) || 0) + e.amount));
-
-    const allCats = new Set([...thisByCat.keys(), ...lastByCat.keys()]);
-    return Array.from(allCats).map(catId => {
+    return Array.from(thisByCat.entries()).map(([catId, amount]) => {
       const cat = state.categories.find(c => c.id === catId);
       return {
         name: cat?.name || '未知',
         icon: cat?.icon || '📦',
-        本月: thisByCat.get(catId) || 0,
-        上月: lastByCat.get(catId) || 0,
+        金额: amount,
       };
-    }).filter(c => c.本月 > 0 || c.上月 > 0);
-  }, [state.expenses, state.expensesLastMonth, state.categories, currentMonth]);
+    }).filter(c => c.金额 > 0);
+  }, [state.expenses, state.categories, currentMonth]);
 
   return (
     <div className="px-4 py-4 space-y-4">
@@ -238,8 +232,7 @@ export default function Statistics() {
                 contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
               />
               <Legend />
-              <Bar dataKey="本月" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="上月" fill="#cbd5e1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="金额" fill="#6366f1" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
