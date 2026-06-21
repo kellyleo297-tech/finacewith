@@ -89,24 +89,27 @@ async function getContext(userId: string): Promise<AgentContext> {
 }
 
 // ── Build specialist prompt ────────────────────────────
-function buildSpecialistPrompt(intent: string, ctx: AgentContext, userMessage: string): string | null {
+function buildSpecialistPrompt(intent: string, ctx: AgentContext, userMessage: string, history?: string): string | null {
+  const contextHeader = history
+    ? `\n\n## 对话历史（最近的对话上下文）\n${history}\n---\n`
+    : '';
   const catUsage = ctx.categoryBudgetUsage.map(c =>
     `- ${c.name}：已花 ¥${c.spent} / 预算 ¥${c.budget}（${c.usage}%）`
   ).join('\n');
 
   switch (intent) {
     case 'record':
-      return `你是记账 Agent。从自然语言提取消费记录，输出 JSON：{"answer":"确认回复","records":[{"amount":数字,"categoryId":"cat_xxx","note":"备注","date":"YYYY-MM-DD"}]}。分类: cat_food(饮食) cat_transport(交通) cat_entertainment(娱乐) cat_shopping(购物) cat_learning(学习) cat_social(社交) cat_medical(医疗) cat_other(其他)。只输出JSON。`;
+      return `你是记账 Agent。从自然语言提取消费记录，输出 JSON：{"answer":"确认回复","records":[{"amount":数字,"categoryId":"cat_xxx","note":"备注","date":"YYYY-MM-DD"}]}。分类: cat_food(饮食) cat_transport(交通) cat_entertainment(娱乐) cat_shopping(购物) cat_learning(学习) cat_social(社交) cat_medical(医疗) cat_other(其他)。${contextHeader}只输出JSON。`;
     case 'analyze':
-      return `你是消费分析 Agent。基于用户真实数据做分析，不编造数据。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 已支出:¥${ctx.monthlyExpenses} 剩余:¥${ctx.remainingBudget} 储蓄进度:${ctx.savingProgress}%\n分类预算:\n${catUsage}\n问题:${userMessage}\n输出 JSON：{"answer":"分析(Markdown)","agentUsed":"Supervisor → 消费分析 Agent"}。只输出JSON。`;
+      return `你是消费分析 Agent。基于用户真实数据做分析，不编造数据。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 已支出:¥${ctx.monthlyExpenses} 剩余:¥${ctx.remainingBudget} 储蓄进度:${ctx.savingProgress}%\n分类预算:\n${catUsage}${contextHeader}问题:${userMessage}\n输出 JSON：{"answer":"分析(Markdown)","agentUsed":"Supervisor → 消费分析 Agent"}。只输出JSON。`;
     case 'budget':
-      return `你是预算规划 Agent。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 已支出:¥${ctx.monthlyExpenses} 总预算:¥${ctx.totalBudget}\n分类:\n${catUsage}\n问题:${userMessage}\n输出 JSON：{"answer":"预算建议(Markdown)","agentUsed":"Supervisor → 预算规划 Agent"}。只输出JSON。`;
+      return `你是预算规划 Agent。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 已支出:¥${ctx.monthlyExpenses} 总预算:¥${ctx.totalBudget}\n分类:\n${catUsage}${contextHeader}问题:${userMessage}\n输出 JSON：{"answer":"预算建议(Markdown)","agentUsed":"Supervisor → 预算规划 Agent"}。只输出JSON。`;
     case 'saving':
-      return `你是储蓄目标 Agent。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 月支出:¥${ctx.monthlyExpenses} 日均可支配:¥${ctx.todaySuggested}${ctx.savingGoal ? ` 目标:${ctx.savingGoal.name} ¥${ctx.savingGoal.targetAmount} 已存:¥${ctx.savingGoal.currentAmount}` : ''}\n问题:${userMessage}\n输出 JSON：{"answer":"储蓄计划(Markdown)","agentUsed":"Supervisor → 储蓄目标 Agent"}。只输出JSON。`;
+      return `你是储蓄目标 Agent。用户:${ctx.userName} 月收入:¥${ctx.monthlyIncome} 月支出:¥${ctx.monthlyExpenses} 日均可支配:¥${ctx.todaySuggested}${ctx.savingGoal ? ` 目标:${ctx.savingGoal.name} ¥${ctx.savingGoal.targetAmount} 已存:¥${ctx.savingGoal.currentAmount}` : ''}${contextHeader}问题:${userMessage}\n输出 JSON：{"answer":"储蓄计划(Markdown)","agentUsed":"Supervisor → 储蓄目标 Agent"}。只输出JSON。`;
     case 'finance_edu':
-      return `你是理财教育 Agent。原则: 不推荐具体股票/基金代码、不承诺收益、不诱导借钱投资、必须含风险提示。用户月收入:¥${ctx.monthlyIncome} 月支出:¥${ctx.monthlyExpenses} 结余:¥${ctx.monthlyIncome - ctx.monthlyExpenses}\n问题:${userMessage}\n输出 JSON：{"answer":"回复(Markdown，必须含⚠️风险提示)","agentUsed":"Supervisor → 理财教育 Agent"}。只输出JSON。`;
+      return `你是理财教育 Agent。原则: 不推荐具体股票/基金代码、不承诺收益、不诱导借钱投资、必须含风险提示。用户月收入:¥${ctx.monthlyIncome} 月支出:¥${ctx.monthlyExpenses} 结余:¥${ctx.monthlyIncome - ctx.monthlyExpenses}${contextHeader}问题:${userMessage}\n输出 JSON：{"answer":"回复(Markdown，必须含⚠️风险提示)","agentUsed":"Supervisor → 理财教育 Agent"}。只输出JSON。`;
     case 'decision':
-      return `你是消费决策 Agent。用户:${ctx.userName} 剩余预算:¥${ctx.remainingBudget} 今日可花:¥${ctx.todaySuggested}\n问题:${userMessage}\n输出 JSON：{"answer":"购买建议分析","agentUsed":"Supervisor → 消费分析 Agent"}。只输出JSON。`;
+      return `你是消费决策 Agent。用户:${ctx.userName} 剩余预算:¥${ctx.remainingBudget} 今日可花:¥${ctx.todaySuggested}${contextHeader}问题:${userMessage}\n输出 JSON：{"answer":"购买建议分析","agentUsed":"Supervisor → 消费分析 Agent"}。只输出JSON。`;
     default:
       return null;
   }
@@ -142,7 +145,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
 
   try {
-    const { message, stream: wantStream, userId } = req.body;
+    const { message, stream: wantStream, userId, history } = req.body;
     if (!message) { res.status(400).json({ error: 'message is required' }); return; }
 
     // Build context from Supabase (or fallback to empty)
@@ -158,8 +161,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Step 1: Supervisor
     const { intent } = await supervisorAgent(message);
 
-    // Step 2: Build specialist prompt
-    const sysPrompt = buildSpecialistPrompt(intent, ctx, message);
+    // Step 2: Build specialist prompt (with conversation history)
+    const sysPrompt = buildSpecialistPrompt(intent, ctx, message, history);
     const agentLabel = getAgentLabel(intent);
 
     if (!sysPrompt) {

@@ -4,6 +4,7 @@
 -- 1. Users table
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT,
   name TEXT NOT NULL,
   role TEXT DEFAULT 'worker',
   currency TEXT DEFAULT 'CNY',
@@ -14,6 +15,9 @@ CREATE TABLE IF NOT EXISTS users (
   saving_goal NUMERIC DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Add email column if table already exists (for existing deploys)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
 
 -- 2. Categories table (default categories per user)
 CREATE TABLE IF NOT EXISTS categories (

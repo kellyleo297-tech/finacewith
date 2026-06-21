@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { User, Expense, Income, Budget, SavingGoal, Alert, Category, Conversation } from '../types';
 import { supabase, type DbExpense, type DbIncome, type DbBudget, type DbSavingGoal } from '../lib/supabase';
+import { useAuth } from './AuthContext';
 
 const currentMonth = () => `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
@@ -77,6 +78,7 @@ interface AppContextValue {
   markAlertRead: (id: string) => void;
   updateUser: (user: Partial<User>) => void;
   createUser: (name: string, role: string) => Promise<void>;
+  updateUserProfile: (data: { name?: string; role?: User['role']; monthlyIncome?: number; incomeSource?: string; budgetMode?: User['budgetMode']; savingGoal?: number; isOnboarded?: boolean }) => Promise<void>;
   loadUserData: (userId: string) => Promise<void>;
 }
 
@@ -85,16 +87,16 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AppState>(initialState);
   const month = currentMonth();
+  const { user: authUser } = useAuth();
 
-  // ── On mount: try to restore session ─────────────────
+  // ── Load data when auth user changes ─────────────────
   useEffect(() => {
-    const savedUserId = localStorage.getItem('moneymate_user_id');
-    if (savedUserId) {
-      loadUserData(savedUserId);
+    if (authUser?.id) {
+      loadUserData(authUser.id);
     } else {
       setState(prev => ({ ...prev, loading: false }));
     }
-  }, []);
+  }, [authUser?.id]);
 
   const loadUserData = useCallback(async (userId: string) => {
     setState(prev => ({ ...prev, loading: true }));
@@ -159,6 +161,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       await loadUserData(data.id);
     }
   }, [month, loadUserData]);
+
+  const updateUserProfile = useCallback(async (data: { name?: string; role?: User['role']; monthlyIncome?: number; incomeSource?: string; budgetMode?: User['budgetMode']; savingGoal?: number; isOnboarded?: boolean }) => {
+    if (!authUser?.id) return;
+    const updates: Record<string, unknown> = {};
+    if (data.name) updates.name = data.name;
+    if (data.role) updates.role = data.role;
+    if (data.monthlyIncome !== undefined) updates.monthly_income = data.monthlyIncome;
+    if (data.incomeSource) updates.income_source = data.incomeSource;
+    if (data.budgetMode) updates.budget_mode = data.budgetMode;
+    if (data.savingGoal !== undefined) updates.saving_goal = data.savingGoal;
+    await supabase.from('users').update(updates).eq('id', authUser.id);
+    setState(prev => ({ ...prev, user: { ...prev.user, ...data as Partial<User>, isOnboarded: data.isOnboarded ?? prev.user.isOnboarded } }));
+  }, [authUser?.id]);
 
   // ── Computed values ──────────────────────────────────
   const monthlyIncome = useMemo(() => state.incomes.reduce((s, i) => s + i.amount, 0) || state.user.monthlyIncome, [state.incomes, state.user.monthlyIncome]);
@@ -243,8 +258,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested,
     savingProgress, categoryBudgetUsage, totalBudget,
     addExpense, addMultipleExpenses, deleteExpense, updateBudget,
-    addConversation, markAlertRead, updateUser, createUser, loadUserData,
-  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, loadUserData]);
+    addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData,
+  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

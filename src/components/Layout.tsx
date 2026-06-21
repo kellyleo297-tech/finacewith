@@ -1,6 +1,7 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, PlusCircle, PiggyBank, BarChart3, Bot, Bell } from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, PlusCircle, PiggyBank, BarChart3, Bot, Bell, LogOut, User } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
 
 const tabs = [
@@ -13,11 +14,19 @@ const tabs = [
 
 export default function Layout() {
   const { state, markAlertRead } = useApp();
+  const { user: authUser, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const unreadAlerts = state.alerts.filter(a => !a.read);
   const hideNav = location.pathname === '/onboarding';
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   return (
     <div className="min-h-dvh bg-slate-50 flex flex-col">
@@ -29,18 +38,44 @@ export default function Layout() {
               <span className="text-2xl">💰</span>
               <h1 className="text-lg font-bold text-slate-800">MoneyMate</h1>
             </div>
-            <div className="relative">
-              <button
-                onClick={() => setShowAlerts(!showAlerts)}
-                className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
-              >
-                <Bell className="w-5 h-5 text-slate-600" />
-                {unreadAlerts.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                    {unreadAlerts.length}
-                  </span>
+            <div className="flex items-center gap-1">
+              {/* User menu */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="p-2 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1"
+                >
+                  <User className="w-5 h-5 text-slate-500" />
+                </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 top-11 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50">
+                    <div className="p-3 border-b border-slate-100">
+                      <p className="text-sm font-medium text-slate-800 truncate">{authUser?.email}</p>
+                      <p className="text-xs text-slate-400">已登录</p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full p-3 text-left text-sm text-red-600 hover:bg-red-50 rounded-b-xl flex items-center gap-2 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" /> 退出登录
+                    </button>
+                  </div>
                 )}
-              </button>
+              </div>
+
+              {/* Alerts */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowAlerts(!showAlerts)}
+                  className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  <Bell className="w-5 h-5 text-slate-600" />
+                  {unreadAlerts.length > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                      {unreadAlerts.length}
+                    </span>
+                  )}
+                </button>
 
               {/* Alert dropdown */}
               {showAlerts && (
@@ -77,6 +112,7 @@ export default function Layout() {
                   )}
                 </div>
               )}
+            </div>
             </div>
           </div>
         </header>
