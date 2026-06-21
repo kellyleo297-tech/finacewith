@@ -1,19 +1,41 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, TrendingDown, Wallet, Target, AlertTriangle, Sparkles, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, Wallet, Target, AlertTriangle, Sparkles, ChevronRight, X, Plus } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
 export default function Dashboard() {
   const {
     state, monthlyIncome, monthlyExpenses, remainingBudget,
     todaySuggested, savingProgress, categoryBudgetUsage, markAlertRead,
+    addIncome, updateUserProfile,
   } = useApp();
   const navigate = useNavigate();
+
+  const [showIncomeEditor, setShowIncomeEditor] = useState(false);
+  const [editAmount, setEditAmount] = useState('');
+  const [editSource, setEditSource] = useState(state.user.incomeSource || '工资');
 
   const unreadAlerts = state.alerts.filter(a => !a.read);
   const dangerAlerts = unreadAlerts.filter(a => a.type === 'danger');
   const warningAlerts = unreadAlerts.filter(a => a.type === 'warning');
-
   const savingGoal = state.savingGoals.find(g => g.status === 'active');
+
+  const handleSaveIncome = async () => {
+    const amount = parseFloat(editAmount);
+    if (!amount || amount <= 0) return;
+
+    const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    await addIncome({
+      amount,
+      source: editSource,
+      incomeDate: new Date().toISOString().slice(0, 10),
+      month,
+      isRecurring: true,
+      note: `${month} ${editSource}`,
+    });
+    await updateUserProfile({ monthlyIncome: amount, incomeSource: editSource });
+    setShowIncomeEditor(false);
+  };
 
   return (
     <div className="px-4 py-4 space-y-4">
@@ -34,10 +56,64 @@ export default function Dashboard() {
         </button>
       </div>
 
+      {/* Income Editor Modal */}
+      {showIncomeEditor && (
+        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4" onClick={() => setShowIncomeEditor(false)}>
+          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-semibold text-slate-800">设置本月收入</h3>
+              <button onClick={() => setShowIncomeEditor(false)} className="p-1 hover:bg-slate-100 rounded-lg">
+                <X className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">金额</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">¥</span>
+                  <input
+                    type="number"
+                    value={editAmount}
+                    onChange={e => setEditAmount(e.target.value)}
+                    placeholder="8000"
+                    className="w-full pl-8 pr-3 py-2.5 text-lg font-bold bg-slate-50 rounded-xl border-0 outline-none focus:ring-2 focus:ring-indigo-500"
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-slate-500 mb-1 block">来源</label>
+                <div className="flex flex-wrap gap-2">
+                  {['工资', '生活费', '兼职', '奖学金', '理财', '其他'].map(src => (
+                    <button
+                      key={src}
+                      onClick={() => setEditSource(src)}
+                      className={`px-3 py-1.5 rounded-lg text-xs transition-all ${editSource === src ? 'bg-indigo-500 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}
+                    >
+                      {src}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={handleSaveIncome}
+                disabled={!editAmount || parseFloat(editAmount) <= 0}
+                className="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Core Financial Cards */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Monthly Income */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        {/* Monthly Income — clickable */}
+        <button
+          onClick={() => { setEditAmount(monthlyIncome.toString()); setShowIncomeEditor(true); }}
+          className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 text-left hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer"
+        >
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-green-600" />
@@ -45,8 +121,8 @@ export default function Dashboard() {
             <span className="text-xs text-slate-500">本月收入</span>
           </div>
           <p className="text-2xl font-bold text-slate-800">¥{monthlyIncome.toLocaleString()}</p>
-          <p className="text-xs text-slate-400 mt-1">{state.user.incomeSource}</p>
-        </div>
+          <p className="text-xs text-slate-400 mt-1">{state.user.incomeSource || '点击设置'}</p>
+        </button>
 
         {/* Monthly Expenses */}
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
@@ -84,8 +160,24 @@ export default function Dashboard() {
             <span className="text-xs text-slate-500">今日建议可花</span>
           </div>
           <p className="text-2xl font-bold text-slate-800">¥{todaySuggested.toLocaleString()}</p>
-          <p className="text-xs text-slate-400 mt-1">剩余 {Math.max(1, 30 - new Date().getDate())} 天</p>
+          <p className="text-xs text-slate-400 mt-1">剩余 {Math.max(1, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate())} 天</p>
         </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="flex gap-2">
+        <button
+          onClick={() => { setEditAmount(''); setShowIncomeEditor(true); }}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-green-50 text-green-700 rounded-xl text-sm font-medium hover:bg-green-100 transition-colors"
+        >
+          <Plus className="w-4 h-4" /> 记收入
+        </button>
+        <button
+          onClick={() => navigate('/budget')}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl text-sm font-medium hover:bg-indigo-100 transition-colors"
+        >
+          <Wallet className="w-4 h-4" /> 管预算
+        </button>
       </div>
 
       {/* Saving Goal Progress */}
@@ -125,11 +217,7 @@ export default function Dashboard() {
             预算提醒
           </h3>
           {dangerAlerts.map(alert => (
-            <div
-              key={alert.id}
-              onClick={() => markAlertRead(alert.id)}
-              className="bg-red-50 border border-red-200 rounded-xl p-3 cursor-pointer animate-shake"
-            >
+            <div key={alert.id} onClick={() => markAlertRead(alert.id)} className="bg-red-50 border border-red-200 rounded-xl p-3 cursor-pointer animate-shake">
               <div className="flex items-start gap-2">
                 <span className="text-red-500 text-lg">⚠️</span>
                 <div className="flex-1">
@@ -140,11 +228,7 @@ export default function Dashboard() {
             </div>
           ))}
           {warningAlerts.map(alert => (
-            <div
-              key={alert.id}
-              onClick={() => markAlertRead(alert.id)}
-              className="bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer"
-            >
+            <div key={alert.id} onClick={() => markAlertRead(alert.id)} className="bg-amber-50 border border-amber-200 rounded-xl p-3 cursor-pointer">
               <div className="flex items-start gap-2">
                 <span className="text-amber-500 text-lg">⚡</span>
                 <div className="flex-1">
@@ -161,10 +245,7 @@ export default function Dashboard() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-semibold text-slate-800">分类预算</h3>
-          <button
-            onClick={() => navigate('/budget')}
-            className="text-xs text-indigo-600 flex items-center gap-1"
-          >
+          <button onClick={() => navigate('/budget')} className="text-xs text-indigo-600 flex items-center gap-1">
             管理 <ChevronRight className="w-3 h-3" />
           </button>
         </div>
@@ -173,23 +254,16 @@ export default function Dashboard() {
             <div key={cat.categoryId}>
               <div className="flex justify-between items-center mb-1">
                 <span className="text-sm text-slate-700">
-                  {DEFAULT_CATEGORY_EMOJI[cat.categoryId] || '📦'} {cat.name}
+                  {CAT_ICONS[cat.categoryId] || '📦'} {cat.name}
                 </span>
-                <span className={`text-xs font-medium ${
-                  cat.usage >= 100 ? 'text-red-600' :
-                  cat.usage >= 70 ? 'text-amber-600' : 'text-slate-400'
-                }`}>
+                <span className={`text-xs font-medium ${cat.usage >= 100 ? 'text-red-600' : cat.usage >= 70 ? 'text-amber-600' : 'text-slate-400'}`}>
                   ¥{cat.spent} / ¥{cat.budget}
                   {cat.usage >= 70 && ` (${cat.usage}%)`}
                 </span>
               </div>
               <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    cat.usage >= 100 ? 'bg-red-500' :
-                    cat.usage >= 70 ? 'bg-amber-500' :
-                    'bg-indigo-500'
-                  }`}
+                  className={`h-full rounded-full transition-all duration-500 ${cat.usage >= 100 ? 'bg-red-500' : cat.usage >= 70 ? 'bg-amber-500' : 'bg-indigo-500'}`}
                   style={{ width: `${Math.min(100, cat.usage)}%` }}
                 />
               </div>
@@ -199,10 +273,7 @@ export default function Dashboard() {
       </div>
 
       {/* AI Suggestion Card */}
-      <div
-        onClick={() => navigate('/ai')}
-        className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-4 text-white cursor-pointer hover:shadow-lg transition-shadow"
-      >
+      <div onClick={() => navigate('/ai')} className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-2xl p-4 text-white cursor-pointer hover:shadow-lg transition-shadow">
         <div className="flex items-center gap-2 mb-2">
           <Sparkles className="w-5 h-5" />
           <h3 className="font-semibold">AI 建议</h3>
@@ -218,22 +289,13 @@ export default function Dashboard() {
   );
 }
 
-const DEFAULT_CATEGORY_EMOJI: Record<string, string> = {
-  cat_food: '🍽️',
-  cat_transport: '🚗',
-  cat_entertainment: '🎮',
-  cat_shopping: '🛍️',
-  cat_learning: '📚',
-  cat_rent: '🏠',
-  cat_medical: '💊',
-  cat_social: '🎁',
-  cat_investment: '📈',
-  cat_other: '📦',
+const CAT_ICONS: Record<string, string> = {
+  cat_food: '🍽️', cat_transport: '🚗', cat_entertainment: '🎮',
+  cat_shopping: '🛍️', cat_learning: '📚', cat_rent: '🏠',
+  cat_medical: '💊', cat_social: '🎁', cat_investment: '📈', cat_other: '📦',
 };
 
-function generateAISuggestion(
-  usage: { name: string; usage: number; categoryId: string }[]
-): string {
+function generateAISuggestion(usage: { name: string; usage: number; categoryId: string }[]): string {
   const maxUsage = usage[0];
   if (!maxUsage) return '你的财务状态看起来不错，继续保持！';
   if (maxUsage.usage >= 100) {

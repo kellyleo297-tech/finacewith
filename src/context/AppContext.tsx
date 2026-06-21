@@ -72,6 +72,7 @@ interface AppContextValue {
   totalBudget: number;
   addExpense: (expense: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => Promise<void>;
   addMultipleExpenses: (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => Promise<void>;
+  addIncome: (income: Omit<Income, 'id' | 'userId'>) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
   updateBudget: (categoryId: string, amount: number, alertThreshold?: number) => Promise<void>;
   addConversation: (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => Promise<void>;
@@ -219,6 +220,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (data) setState(prev => ({ ...prev, expenses: [...data.map(toExpense), ...prev.expenses] }));
   }, [state.user.id]);
 
+  const addIncome = useCallback(async (inc: Omit<Income, 'id' | 'userId'>) => {
+    const { data } = await supabase.from('incomes').insert({
+      user_id: state.user.id, amount: inc.amount, source: inc.source,
+      income_date: inc.incomeDate, month: inc.month, is_recurring: inc.isRecurring, note: inc.note,
+    }).select().single();
+    if (data) {
+      setState(prev => ({ ...prev, incomes: [...prev.incomes, toIncome(data)] }));
+      // Also update user's monthly_income field
+      await supabase.from('users').update({ monthly_income: Number(data.amount) }).eq('id', state.user.id);
+    }
+  }, [state.user.id]);
+
   const deleteExpense = useCallback(async (id: string) => {
     await supabase.from('expenses').delete().eq('id', id);
     setState(prev => ({ ...prev, expenses: prev.expenses.filter(e => e.id !== id) }));
@@ -257,9 +270,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo(() => ({
     state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested,
     savingProgress, categoryBudgetUsage, totalBudget,
-    addExpense, addMultipleExpenses, deleteExpense, updateBudget,
+    addExpense, addMultipleExpenses, addIncome, deleteExpense, updateBudget,
     addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData,
-  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData]);
+  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, addIncome, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
