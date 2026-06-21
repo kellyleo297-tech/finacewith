@@ -11,7 +11,12 @@ export default defineConfig({
       : { proxy: { '/api': 'http://localhost:3001' } }),
   },
   build: {
-    modulePreload: false,
+    // Only preload vendor (React) — charts & supabase load on demand
+    modulePreload: {
+      resolveDependencies(_filename: string, deps: string[]) {
+        return deps.filter(d => !d.includes('charts') && !d.includes('supabase'));
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks(id: string) {
