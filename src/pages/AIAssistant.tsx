@@ -3,6 +3,15 @@ import { Send, Bot, User, Loader2, Check, Sparkles, Clock, Trash2, ChevronLeft }
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { marked } from 'marked';
+
+// Configure marked for safe rendering
+marked.setOptions({ breaks: true, gfm: true });
+
+function renderMarkdown(text: string): string {
+  if (!text) return '';
+  return marked.parse(text) as string;
+}
 import { QUICK_QUESTIONS } from '../data/mockData';
 import type { Conversation } from '../types';
 
@@ -287,7 +296,11 @@ export default function AIAssistant() {
                   <div className={`px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                     msg.role === 'user' ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white border border-slate-100 text-slate-700 rounded-tl-sm shadow-sm'
                   }`}>
-                    {msg.content}
+                    {msg.role === 'assistant' ? (
+                      <div className="prose prose-sm max-w-none prose-slate prose-headings:text-slate-800 prose-p:text-slate-700 prose-strong:text-slate-800 prose-li:text-slate-700 prose-a:text-indigo-600" dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                    ) : (
+                      msg.content
+                    )}
                     {isThinking && i === messages.length - 1 && msg.role === 'assistant' && msg.content && (
                       <span className="inline-block w-1.5 h-4 bg-indigo-500 ml-0.5 animate-pulse rounded-sm align-middle" />
                     )}
