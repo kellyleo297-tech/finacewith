@@ -1,0 +1,1661 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MoneyMate AI 项目展示</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #66728a;
+      --subtle: #8b98ad;
+      --line: #e7ebf3;
+      --paper: #ffffff;
+      --wash: #f6f8fc;
+      --violet: #654cff;
+      --violet-2: #8e42ff;
+      --green: #10b981;
+      --pink: #ec4899;
+      --amber: #f59e0b;
+      --blue: #4f6df5;
+      --shadow: 0 24px 70px rgba(52, 64, 102, 0.14);
+      --soft-shadow: 0 14px 40px rgba(49, 60, 91, 0.10);
+      --font-display: "MiSans", "HarmonyOS Sans SC", "OPPOSans", "PingFang SC", "Noto Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+      --font-body: Inter, "SF Pro Text", "PingFang SC", "Noto Sans SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(90deg, rgba(101, 76, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(16, 185, 129, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, #f9fbff 0%, #f4f7fb 46%, #ffffff 100%);
+      background-size: 44px 44px, 44px 44px, auto;
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 16px;
+      letter-spacing: 0;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page-shell {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(231, 235, 243, 0.8);
+      background: rgba(249, 251, 255, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      color: #1d273b;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #fff2bd, #ffd56a);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      font-size: 19px;
+    }
+
+    nav {
+      display: flex;
+      gap: 4px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    nav a {
+      padding: 10px 12px;
+      border-radius: 999px;
+    }
+
+    nav a:hover {
+      background: rgba(101, 76, 255, 0.08);
+      color: var(--violet);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.02fr) minmax(360px, 0.98fr);
+      gap: 58px;
+      align-items: center;
+      padding: 74px 0 76px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      padding: 8px 12px;
+      border: 1px solid rgba(101, 76, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--violet);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    h1, h2, h3, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      max-width: 760px;
+      font-family: var(--font-display);
+      font-size: clamp(42px, 5.8vw, 72px);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .hero-copy {
+      max-width: 690px;
+      margin-bottom: 28px;
+      color: #42506a;
+      font-size: 19px;
+      font-weight: 450;
+      line-height: 1.86;
+    }
+
+    .hero-copy strong {
+      color: #1d273b;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 34px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .button.primary {
+      background: linear-gradient(135deg, var(--violet), var(--violet-2));
+      color: white;
+      box-shadow: 0 14px 30px rgba(101, 76, 255, 0.24);
+    }
+
+    .button.secondary {
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      color: #28344c;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 650px;
+    }
+
+    .metric-card {
+      padding: 18px;
+      border: 1px solid rgba(231, 235, 243, 0.9);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.76);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .metric-card b {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 22px;
+      color: #1d273b;
+    }
+
+    .metric-card span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .hero-phones {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      align-items: start;
+      justify-items: center;
+      min-height: 0;
+    }
+
+    .hero-phones .phone-card:first-child {
+      margin-top: 18px;
+    }
+
+    .hero-phones .phone-card:nth-child(2) {
+      margin-top: 70px;
+    }
+
+    .phone-card {
+      width: min(280px, 100%);
+    }
+
+    .phone {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 430 / 840;
+      border: 7px solid #111827;
+      border-radius: 32px;
+      background: #111827;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .phone:before {
+      content: "";
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      z-index: 3;
+      width: 58px;
+      height: 11px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #111827;
+    }
+
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+
+    .phone img {
+      position: absolute;
+      height: auto;
+      max-width: none;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .shot-auth img {
+      width: 320%;
+      left: -110%;
+      top: -7.8%;
+    }
+
+    .shot-main img {
+      width: 332%;
+      left: -116%;
+      top: -7.6%;
+    }
+
+    .shot-dashboard img,
+    .shot-budget img,
+    .shot-stats img {
+      top: -7.4%;
+    }
+
+    .shot-ai img {
+      width: 326%;
+      left: -113%;
+      top: -7.4%;
+    }
+
+    .caption {
+      margin-top: 14px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    section {
+      padding: 82px 0;
+      border-top: 1px solid rgba(231, 235, 243, 0.8);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 34px;
+    }
+
+    .section-kicker {
+      margin-bottom: 12px;
+      color: var(--violet);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 0;
+      font-family: var(--font-display);
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 850;
+      line-height: 1.12;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .section-desc {
+      max-width: 460px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    .three-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .insight-card,
+    .principle-card,
+    .agent-card,
+    .tech-card,
+    .roadmap-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .insight-card {
+      min-height: 230px;
+      padding: 24px;
+    }
+
+    .number-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      background: rgba(101, 76, 255, 0.10);
+      color: var(--violet);
+      font-weight: 900;
+    }
+
+    h3 {
+      margin-bottom: 10px;
+      font-family: var(--font-display);
+      color: #1d273b;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.25;
+    }
+
+    .insight-card p,
+    .principle-card p,
+    .agent-card p,
+    .tech-card p,
+    .roadmap-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .loop {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .loop-step {
+      position: relative;
+      min-height: 140px;
+      padding: 20px 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .loop-step:not(:last-child):after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -17px;
+      z-index: 2;
+      width: 22px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--violet), transparent);
+    }
+
+    .loop-step b {
+      display: block;
+      margin-bottom: 9px;
+      color: #1d273b;
+      font-size: 17px;
+    }
+
+    .loop-step span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .feature-row {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(300px, 0.7fr);
+      gap: 58px;
+      align-items: center;
+      padding: 54px 0;
+    }
+
+    .feature-row + .feature-row {
+      border-top: 1px solid rgba(231, 235, 243, 0.8);
+    }
+
+    .feature-row:nth-child(even) {
+      grid-template-columns: minmax(300px, 0.7fr) minmax(0, 0.95fr);
+    }
+
+    .feature-row:nth-child(even) .feature-copy {
+      order: 2;
+    }
+
+    .feature-copy .tag {
+      display: inline-flex;
+      margin-bottom: 16px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(101, 76, 255, 0.10);
+      color: var(--violet);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .feature-copy h3 {
+      max-width: 600px;
+      margin-bottom: 16px;
+      font-size: clamp(28px, 4vw, 42px);
+      letter-spacing: 0;
+    }
+
+    .feature-copy p {
+      max-width: 620px;
+      color: #4e5c73;
+      font-size: 17px;
+      line-height: 1.9;
+    }
+
+    .detail-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 22px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .detail-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: #3d4a60;
+      line-height: 1.65;
+    }
+
+    .detail-list li:before {
+      content: "";
+      flex: 0 0 auto;
+      width: 8px;
+      height: 8px;
+      margin-top: 9px;
+      border-radius: 999px;
+      background: var(--violet);
+    }
+
+    .phone-wrap {
+      display: grid;
+      place-items: center;
+    }
+
+    .phone-wrap .phone-card {
+      width: min(390px, 86vw);
+    }
+
+    .agent-panel {
+      display: grid;
+      grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+      gap: 20px;
+      align-items: stretch;
+    }
+
+    .routing-card {
+      padding: 28px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #211b4f, #4930de 64%, #8e42ff);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .routing-card h3 {
+      color: white;
+      font-size: 30px;
+    }
+
+    .routing-card p {
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.8;
+    }
+
+    .route-flow {
+      display: grid;
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .route-flow div {
+      padding: 13px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.10);
+      color: rgba(255, 255, 255, 0.94);
+      font-weight: 700;
+    }
+
+    .agent-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .agent-card {
+      padding: 20px;
+    }
+
+    .agent-card b {
+      display: block;
+      margin-bottom: 8px;
+      color: #1d273b;
+      font-size: 16px;
+    }
+
+    .agent-card p {
+      font-size: 14px;
+    }
+
+    .principle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .principle-card {
+      padding: 24px;
+      min-height: 190px;
+    }
+
+    .principle-card b {
+      display: block;
+      margin-bottom: 12px;
+      color: #1d273b;
+      font-size: 19px;
+    }
+
+    .architecture {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .tech-card {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 18px;
+      align-items: center;
+      padding: 22px;
+    }
+
+    .tech-card b {
+      color: #1d273b;
+      font-size: 18px;
+    }
+
+    .tech-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      min-height: 30px;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #f2f5fb;
+      color: #4a5870;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .roadmap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .roadmap-visual {
+      margin-bottom: 24px;
+      padding: 28px;
+      border: 1px solid rgba(231, 235, 243, 0.96);
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.90), rgba(246, 248, 252, 0.88));
+      box-shadow: var(--soft-shadow);
+    }
+
+    .evolution-map {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .evolution-column {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .evolution-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+    }
+
+    .evolution-title b {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: #1d273b;
+    }
+
+    .evolution-title span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.10);
+      color: #0f9f73;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .evolution-column.next .evolution-title span {
+      background: rgba(101, 76, 255, 0.10);
+      color: var(--violet);
+    }
+
+    .evolution-item {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .evolution-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(79, 109, 245, 0.10);
+      color: var(--blue);
+      font-weight: 900;
+    }
+
+    .evolution-column.next .evolution-icon {
+      background: rgba(245, 158, 11, 0.12);
+      color: #b97000;
+    }
+
+    .evolution-item b {
+      display: block;
+      margin-bottom: 4px;
+      font-family: var(--font-display);
+      color: #1d273b;
+      font-size: 15px;
+    }
+
+    .evolution-item p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .evolution-arrow {
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 10px;
+      min-width: 92px;
+      color: var(--violet);
+      font-family: var(--font-display);
+      font-weight: 900;
+    }
+
+    .arrow-line {
+      position: relative;
+      width: 86px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green), var(--violet));
+    }
+
+    .arrow-line:after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -2px;
+      width: 10px;
+      height: 10px;
+      border-top: 2px solid var(--violet);
+      border-right: 2px solid var(--violet);
+      transform: translateY(-50%) rotate(45deg);
+    }
+
+    .snapshot-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+      align-items: start;
+    }
+
+    .snapshot-card {
+      display: grid;
+      justify-items: center;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: var(--soft-shadow);
+    }
+
+    .snapshot-card .phone-card {
+      width: min(260px, 76vw);
+    }
+
+    .snapshot-card h3 {
+      margin-bottom: 6px;
+      font-size: 19px;
+      text-align: center;
+    }
+
+    .snapshot-card p {
+      margin: 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .roadmap-card {
+      padding: 24px;
+    }
+
+    .roadmap-card h3 {
+      font-size: 24px;
+    }
+
+    .roadmap-list {
+      display: grid;
+      gap: 10px;
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .roadmap-list li {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+      color: #4b5870;
+      line-height: 1.5;
+    }
+
+    .status {
+      flex: 0 0 auto;
+      color: var(--green);
+      font-weight: 900;
+    }
+
+    .status.next {
+      color: var(--violet);
+    }
+
+    .finale {
+      padding-bottom: 92px;
+    }
+
+    .finale-card {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.5fr);
+      gap: 34px;
+      align-items: center;
+      padding: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.56);
+      border-radius: 8px;
+      background: linear-gradient(135deg, #1d273b, #312465 58%, #6b3df4);
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .finale-card h2 {
+      color: white;
+    }
+
+    .finale-card p {
+      margin-bottom: 0;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 17px;
+      line-height: 1.85;
+    }
+
+    .finale-card .button {
+      width: fit-content;
+      background: white;
+      color: #2b2460;
+    }
+
+    footer {
+      padding: 34px 0 48px;
+      color: var(--subtle);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      nav {
+        display: none;
+      }
+
+      .hero,
+      .feature-row,
+      .feature-row:nth-child(even),
+      .agent-panel,
+      .finale-card {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        gap: 32px;
+      }
+
+      .hero-phones {
+        max-width: 620px;
+        margin: 0 auto;
+      }
+
+      .hero-phones .phone-card:first-child {
+        margin-top: 0;
+      }
+
+      .hero-phones .phone-card:nth-child(2) {
+        margin-top: 36px;
+      }
+
+      .feature-row:nth-child(even) .feature-copy {
+        order: 0;
+      }
+
+      .three-grid,
+      .principle-grid,
+      .snapshot-grid,
+      .roadmap {
+        grid-template-columns: 1fr;
+      }
+
+      .evolution-map {
+        grid-template-columns: 1fr;
+      }
+
+      .evolution-arrow {
+        min-height: 48px;
+      }
+
+      .arrow-line {
+        width: 2px;
+        height: 42px;
+      }
+
+      .arrow-line:after {
+        top: auto;
+        right: 50%;
+        bottom: -2px;
+        transform: translateX(50%) rotate(135deg);
+      }
+
+      .loop {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .loop-step:after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page-shell {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .hero {
+        padding-top: 48px;
+      }
+
+      .hero-copy {
+        font-size: 17px;
+      }
+
+      .metric-grid,
+      .agent-grid,
+      .loop {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-phones {
+        min-height: auto;
+        display: grid;
+        gap: 22px;
+        justify-items: center;
+      }
+
+      .hero-phones .phone-card:first-child,
+      .hero-phones .phone-card:nth-child(2) {
+        position: relative;
+        inset: auto;
+        margin-top: 0;
+        width: min(330px, 84vw);
+      }
+
+      .section-head {
+        display: block;
+      }
+
+      .section-desc {
+        margin-top: 16px;
+      }
+
+      section {
+        padding: 58px 0;
+      }
+
+      .feature-row {
+        padding: 36px 0;
+        gap: 28px;
+      }
+
+      .tech-card {
+        grid-template-columns: 1fr;
+      }
+
+      .finale-card {
+        padding: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="page-shell topbar-inner">
+      <a class="brand" href="#top" aria-label="MoneyMate AI">
+        <span class="brand-mark">💰</span>
+        <span>MoneyMate AI</span>
+      </a>
+      <nav aria-label="页面导航">
+        <a href="#problem">定位</a>
+        <a href="#loop">闭环</a>
+        <a href="#experience">体验</a>
+        <a href="#agents">Agent</a>
+        <a href="#architecture">架构</a>
+        <a href="#roadmap">路线图</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="page-shell hero">
+      <div>
+        <div class="eyebrow">Vibe Coding Project · AI 产品案例</div>
+        <h1>把记账做成一个真正会帮你管钱的 Agent</h1>
+        <p class="hero-copy">
+          <strong>MoneyMate AI</strong> 面向学生和年轻白领，不止记录收支，而是把收入、支出、预算、消费结构和储蓄目标串成一个可执行的个人财务管理闭环。
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="https://finacewith.vercel.app" target="_blank" rel="noreferrer">在线体验</a>
+          <a class="button secondary" href="#experience">查看项目拆解</a>
+        </div>
+        <div class="metric-grid">
+          <div class="metric-card">
+            <b>7 Agent</b>
+            <span>用户感知一个助手，系统内部由多 Agent 分工协作。</span>
+          </div>
+          <div class="metric-card">
+            <b>5 页面</b>
+            <span>首页、记账、预算、统计、AI 助手构成 MVP 主流程。</span>
+          </div>
+          <div class="metric-card">
+            <b>SSE</b>
+            <span>AI 回复流式输出，降低等待感，保留对话上下文。</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-phones" aria-label="项目界面预览">
+        <div class="phone-card">
+          <div class="phone shot-main shot-dashboard">
+            <div class="phone-screen">
+              <img src="moneymate-assets/dashboard.png" alt="MoneyMate 首页财务看板截图">
+            </div>
+          </div>
+          <div class="caption">首页财务看板</div>
+        </div>
+        <div class="phone-card">
+          <div class="phone shot-main shot-ai">
+            <div class="phone-screen">
+              <img src="moneymate-assets/ai-answer.png" alt="MoneyMate AI 助手规划建议截图">
+            </div>
+          </div>
+          <div class="caption">AI 财务助手</div>
+        </div>
+      </div>
+    </div>
+
+    <section id="problem">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Product Positioning</div>
+            <h2>产品定位：从“记一笔”升级为“下一步怎么做”</h2>
+          </div>
+          <p class="section-desc">这个项目的核心不是把传统记账 App 换一层 AI 外壳，而是让 AI 进入财务管理链路，帮助用户理解、调整并坚持。</p>
+        </div>
+
+        <div class="three-grid">
+          <article class="insight-card">
+            <span class="number-pill">01</span>
+            <h3>用户不缺记录入口，缺持续反馈</h3>
+            <p>学生和年轻白领往往知道自己花了钱，却很难持续复盘为什么超支、哪些分类该收紧、剩下的钱应该怎么安排。</p>
+          </article>
+          <article class="insight-card">
+            <span class="number-pill">02</span>
+            <h3>预算不是静态表格，而是动态约束</h3>
+            <p>MoneyMate 把预算拆到分类维度，用进度条、阈值、超支提醒和今日建议可花，把“月末后悔”前移成“当下提醒”。</p>
+          </article>
+          <article class="insight-card">
+            <span class="number-pill">03</span>
+            <h3>AI 的价值在解释和行动建议</h3>
+            <p>金额计算由代码完成，AI 读取真实数据后负责解释消费结构、拆解储蓄目标、生成预算优化建议，并在理财场景做合规提示。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="loop">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Core Loop</div>
+            <h2>核心闭环：记录、预警、复盘、规划</h2>
+          </div>
+          <p class="section-desc">围绕个人现金流，MoneyMate 把每一次输入都转成后续管理动作，让财务管理从被动记录变成主动决策。</p>
+        </div>
+
+        <div class="loop">
+          <div class="loop-step">
+            <b>设置收入</b>
+            <span>用户初始化月收入与收入来源，形成预算计算的基线。</span>
+          </div>
+          <div class="loop-step">
+            <b>记录支出</b>
+            <span>手动记录或自然语言记录，AI 提取后再由用户确认。</span>
+          </div>
+          <div class="loop-step">
+            <b>分类预算</b>
+            <span>默认 8 类预算，支持编辑金额和提醒阈值。</span>
+          </div>
+          <div class="loop-step">
+            <b>超支提醒</b>
+            <span>进度条和消息中心同步给出预算预警。</span>
+          </div>
+          <div class="loop-step">
+            <b>统计复盘</b>
+            <span>饼图、趋势线、月度对比帮助用户定位原因。</span>
+          </div>
+          <div class="loop-step">
+            <b>AI 规划</b>
+            <span>基于真实数据给出储蓄、预算和理财教育建议。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Product Experience</div>
+            <h2>关键体验拆解</h2>
+          </div>
+          <p class="section-desc">每个功能模块都服务于同一个目标：减少用户管理财务的认知负担，同时保留关键确认权。</p>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">用户系统</span>
+            <h3>先建立可信的数据账户，再进入个人财务空间</h3>
+            <p>邮箱密码注册登录由 Supabase Auth 支撑，用户数据云端持久化，换设备后仍能同步收入、支出、预算和对话历史。新用户注册后自动创建默认分类预算，降低首次配置成本。</p>
+            <ul class="detail-list">
+              <li>注册、登录、邮箱确认和退出登录构成完整账户链路。</li>
+              <li>预算默认值在新用户阶段自动生成，避免空白首页。</li>
+              <li>用户数据通过云端隔离，为后续长期记账和 AI 分析打基础。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-auth">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/register.png" alt="MoneyMate 注册页面截图">
+                </div>
+              </div>
+              <div class="caption">注册与账户初始化</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">首页看板</span>
+            <h3>用四个数字回答“这个月还能怎么花”</h3>
+            <p>首页不是信息堆叠，而是把用户最关心的财务状态压缩成收入、已支出、剩余预算、今日建议可花。下方分类预算和 AI 建议卡片，把风险从月末结算前移到日常决策。</p>
+            <ul class="detail-list">
+              <li>收入卡片可点击编辑，支持快速调整月度现金流基线。</li>
+              <li>分类预算使用颜色表达风险状态，超支时直观变红。</li>
+              <li>AI 建议卡片把“发生了什么”转成“现在该怎么做”。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main shot-dashboard">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/dashboard.png" alt="MoneyMate 首页看板截图">
+                </div>
+              </div>
+              <div class="caption">首页财务状态总览</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">收入设置</span>
+            <h3>预算从收入开始，先确定可支配边界</h3>
+            <p>收入编辑以弹窗方式出现，不打断首页上下文。用户只需要输入金额并选择来源，系统就能重新计算剩余预算和今日建议可花，让首页始终围绕真实现金流更新。</p>
+            <ul class="detail-list">
+              <li>来源标签覆盖工资、生活费、兼职、奖学金、理财等常见场景。</li>
+              <li>弹窗集中处理单一任务，避免用户在复杂表单中迷失。</li>
+              <li>收入变化会影响预算看板、AI 分析和后续规划建议。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/income-modal.png" alt="MoneyMate 设置本月收入弹窗截图">
+                </div>
+              </div>
+              <div class="caption">设置本月收入</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">智能记账</span>
+            <h3>手动足够快，自然语言更接近日常表达</h3>
+            <p>记账页保留金额、分类、备注、日期、支付方式的完整手动入口，同时提供自然语言记账。用户可以直接输入“午饭花了35，奶茶18”，由 AI 结构化提取后弹出确认，再写入数据库。</p>
+            <ul class="detail-list">
+              <li>常见分类以图标按钮呈现，降低输入阻力。</li>
+              <li>自然语言入口放在手动记账下方，兼顾确定性与智能化。</li>
+              <li>最近记录列表支持删除，方便纠错和维护数据质量。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/record.png" alt="MoneyMate 记账页面截图">
+                </div>
+              </div>
+              <div class="caption">手动记账与自然语言入口</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">预算管理</span>
+            <h3>分类预算让“超支”变成可定位的问题</h3>
+            <p>预算页先给出月度总预算使用率，再拆到娱乐、饮食、购物、交通等分类。用户能看到每类预算的使用金额、比例和风险状态，超支分类会明确标记，方便立即调整。</p>
+            <ul class="detail-list">
+              <li>月度总预算卡片同时展示已用、剩余、已过天数和剩余天数。</li>
+              <li>分类预算支持独立编辑，适合不同生活方式的用户。</li>
+              <li>颜色从正常到预警逐级变化，减少用户解读成本。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main shot-budget">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/budget.png" alt="MoneyMate 预算管理页面截图">
+                </div>
+              </div>
+              <div class="caption">月度预算与分类预警</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">统计分析</span>
+            <h3>用图表把消费结构讲清楚</h3>
+            <p>统计页把流水数据转成可理解的图表：分类支出占比回答钱花在哪，日支出趋势回答哪天失控，固定/弹性和必要/非必要帮助用户区分刚性支出与可调整空间。</p>
+            <ul class="detail-list">
+              <li>饼图适合识别主要支出分类，趋势线适合捕捉异常消费日。</li>
+              <li>固定与弹性、必要与非必要的拆分，为 AI 建议提供解释框架。</li>
+              <li>日均支出、最高单日、记账笔数形成轻量复盘指标。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main shot-stats">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/stats-top.png" alt="MoneyMate 统计分析页面截图">
+                </div>
+              </div>
+              <div class="caption">分类占比与每日趋势</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="feature-row">
+          <div class="feature-copy">
+            <span class="tag">AI 助手</span>
+            <h3>一个入口承接记账、分析、预算和理财教育</h3>
+            <p>AI 助手对用户而言是一个连续对话界面，对系统而言是多 Agent 协作入口。它支持快捷问题、上下文记忆、流式输出和对话历史，让财务建议以更自然的方式进入日常使用。</p>
+            <ul class="detail-list">
+              <li>快捷问题覆盖“还能花多少钱”“哪里花多了”“下月预算”等高频意图。</li>
+              <li>连续对话会记住上下文，减少重复解释。</li>
+              <li>理财类回答经过风控合规审查，避免承诺收益或诱导高风险操作。</li>
+            </ul>
+          </div>
+          <div class="phone-wrap">
+            <div class="phone-card">
+              <div class="phone shot-main shot-ai">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/ai-answer.png" alt="MoneyMate AI 助手回答截图">
+                </div>
+              </div>
+              <div class="caption">基于真实数据的规划建议</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Interface Snapshots</div>
+            <h2>更多界面快照</h2>
+          </div>
+          <p class="section-desc">补充展示登录、统计下半屏和 AI 生成状态，让项目从账户入口到分析结果的完整性更清楚。</p>
+        </div>
+
+        <div class="snapshot-grid">
+          <article class="snapshot-card">
+            <div class="phone-card">
+              <div class="phone shot-auth">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/login.png" alt="MoneyMate 登录页面截图">
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3>登录入口</h3>
+              <p>清晰的邮箱密码登录流程，承接云端数据同步和个人账户隔离。</p>
+            </div>
+          </article>
+
+          <article class="snapshot-card">
+            <div class="phone-card">
+              <div class="phone shot-main shot-stats">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/stats-bottom.png" alt="MoneyMate 统计分析下半屏截图">
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3>月度对比</h3>
+              <p>柱状图和轻量指标帮助用户快速判断主要支出分类和消费强度。</p>
+            </div>
+          </article>
+
+          <article class="snapshot-card">
+            <div class="phone-card">
+              <div class="phone shot-main shot-ai">
+                <div class="phone-screen">
+                  <img src="moneymate-assets/ai-thinking.png" alt="MoneyMate AI 思考中页面截图">
+                </div>
+              </div>
+            </div>
+            <div>
+              <h3>流式生成</h3>
+              <p>对话状态明确展示 AI 正在处理，降低用户等待时的不确定感。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="agents">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Agent Design</div>
+            <h2>用户只感知一个助手，系统内部由 7 个 Agent 协作</h2>
+          </div>
+          <p class="section-desc">MoneyMate 的 AI 架构不追求炫技，而是围绕财务任务拆分职责：识别意图、提取数据、解释原因、规划预算、做安全审查。</p>
+        </div>
+
+        <div class="agent-panel">
+          <article class="routing-card">
+            <h3>Supervisor 先路由，Specialist 再处理</h3>
+            <p>高频记账意图优先走规则层，命中后快速进入结构化提取；分析、预算、储蓄和理财教育等复杂问题再交给对应 Agent。这样既降低延迟和 token 成本，也让输出更稳定。</p>
+            <div class="route-flow" aria-label="Agent 路由流程">
+              <div>用户输入：我每月剩 1500，可以如何规划？</div>
+              <div>Supervisor Agent：识别为财务规划意图</div>
+              <div>读取 Supabase 真实收支与预算数据</div>
+              <div>理财教育 Agent 生成建议</div>
+              <div>Compliance Agent 审查风险提示</div>
+            </div>
+          </article>
+
+          <div class="agent-grid">
+            <article class="agent-card">
+              <b>Supervisor Agent</b>
+              <p>负责意图识别和路由调度，在规则层和 LLM 兜底之间做选择。</p>
+            </article>
+            <article class="agent-card">
+              <b>记账 Agent</b>
+              <p>把自然语言消费描述提取为金额、分类、备注、日期等结构化字段。</p>
+            </article>
+            <article class="agent-card">
+              <b>消费分析 Agent</b>
+              <p>读取真实支出数据，解释消费结构和超支原因。</p>
+            </article>
+            <article class="agent-card">
+              <b>预算规划 Agent</b>
+              <p>根据收入、支出和分类预算，给出下月预算优化方案。</p>
+            </article>
+            <article class="agent-card">
+              <b>储蓄目标 Agent</b>
+              <p>把目标金额拆成月、周、日计划，让目标变得可执行。</p>
+            </article>
+            <article class="agent-card">
+              <b>理财教育 Agent</b>
+              <p>讲解基础理财知识，优先强调应急金、风险承受能力和长期规划。</p>
+            </article>
+            <article class="agent-card">
+              <b>风控合规 Agent</b>
+              <p>对理财输出做二次审查，拦截荐股、收益承诺和高风险诱导。</p>
+            </article>
+            <article class="agent-card">
+              <b>前端确认层</b>
+              <p>AI 负责理解，用户负责确认，确认后才写入数据库。</p>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">PM Decisions</div>
+            <h2>几个关键产品策略</h2>
+          </div>
+          <p class="section-desc">在 AI 财务产品里，最重要的不是让模型“什么都能说”，而是明确哪些事情由代码保障，哪些事情交给 Agent 增强。</p>
+        </div>
+
+        <div class="principle-grid">
+          <article class="principle-card">
+            <b>代码负责算账，Agent 负责解释</b>
+            <p>收入、支出、预算余额等金额计算全部由确定性代码完成，AI 不直接承担财务计算的事实来源。</p>
+          </article>
+          <article class="principle-card">
+            <b>代码负责触发，Agent 负责建议</b>
+            <p>预算超支、提醒阈值、消息中心由系统规则触发；Agent 负责把结果转成用户听得懂的建议。</p>
+          </article>
+          <article class="principle-card">
+            <b>代码负责权限，Agent 负责交互</b>
+            <p>用户认证、数据隔离和 API Key 都由服务端与 Supabase 管理，AI 只在授权数据范围内生成回答。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Technical Architecture</div>
+            <h2>从前端体验到云端 Agent 的全栈实现</h2>
+          </div>
+          <p class="section-desc">项目采用移动端优先的 React SPA，结合 Supabase 数据层、Vercel Serverless Function 和 DeepSeek API，实现完整上线体验。</p>
+        </div>
+
+        <div class="architecture">
+          <article class="tech-card">
+            <b>前端应用</b>
+            <div>
+              <p>负责页面交互、路由保护、图表展示、底部导航、消息中心和 AI 对话界面。</p>
+              <div class="tech-chips">
+                <span class="chip">React 19</span>
+                <span class="chip">TypeScript</span>
+                <span class="chip">Vite 8</span>
+                <span class="chip">Tailwind CSS 4</span>
+                <span class="chip">Recharts</span>
+                <span class="chip">Lucide Icons</span>
+              </div>
+            </div>
+          </article>
+          <article class="tech-card">
+            <b>数据与认证</b>
+            <div>
+              <p>用户、收入、支出、预算和对话历史落在 Supabase PostgreSQL，认证和数据隔离由平台能力承接。</p>
+              <div class="tech-chips">
+                <span class="chip">Supabase Auth</span>
+                <span class="chip">PostgreSQL</span>
+                <span class="chip">RLS 数据隔离</span>
+                <span class="chip">云端持久化</span>
+              </div>
+            </div>
+          </article>
+          <article class="tech-card">
+            <b>AI 后端</b>
+            <div>
+              <p>Vercel Serverless Function 承接 /api/chat 请求，通过 SSE 返回流式内容，并调度 Supervisor 与 specialist agents。</p>
+              <div class="tech-chips">
+                <span class="chip">Vercel Functions</span>
+                <span class="chip">SSE Streaming</span>
+                <span class="chip">DeepSeek API</span>
+                <span class="chip">OpenAI SDK Compatible</span>
+                <span class="chip">7-Agent 协作</span>
+              </div>
+            </div>
+          </article>
+          <article class="tech-card">
+            <b>部署上线</b>
+            <div>
+              <p>前端与 AI 能力一起部署在 Vercel，获得 HTTPS、CDN 和 Serverless 扩展能力，适合 MVP 快速验证。</p>
+              <div class="tech-chips">
+                <span class="chip">Vercel</span>
+                <span class="chip">HTTPS</span>
+                <span class="chip">CDN</span>
+                <span class="chip">Serverless</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="page-shell">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Delivery & Roadmap</div>
+            <h2>完成度与下一步</h2>
+          </div>
+          <p class="section-desc">当前版本已经覆盖 MVP 主链路，下一步可以围绕更低输入成本和更强复盘能力继续扩展。</p>
+        </div>
+
+        <div class="roadmap-visual" role="img" aria-label="MoneyMate AI 从当前 MVP 到下一阶段能力的演进图">
+          <div class="evolution-map">
+            <div class="evolution-column">
+              <div class="evolution-title">
+                <b>当前 MVP</b>
+                <span>已上线</span>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">01</div>
+                <div>
+                  <b>记录与预算闭环</b>
+                  <p>手动记账、自然语言记账、分类预算和超支提醒已经形成主流程。</p>
+                </div>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">02</div>
+                <div>
+                  <b>数据可视化复盘</b>
+                  <p>通过分类占比、每日趋势和月度对比，把流水转成可读分析。</p>
+                </div>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">03</div>
+                <div>
+                  <b>AI 对话式建议</b>
+                  <p>7-Agent 协作完成记账解析、消费分析、预算规划和理财教育。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="evolution-arrow" aria-hidden="true">
+              <span>演进</span>
+              <div class="arrow-line"></div>
+            </div>
+
+            <div class="evolution-column next">
+              <div class="evolution-title">
+                <b>下一阶段</b>
+                <span>预期</span>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">A</div>
+                <div>
+                  <b>更低输入成本</b>
+                  <p>小程序、语音记账和截图 OCR，让记账从主动填写变成顺手捕获。</p>
+                </div>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">B</div>
+                <div>
+                  <b>更强主动复盘</b>
+                  <p>月度 AI 报告自动总结消费变化、预算执行和储蓄目标偏差。</p>
+                </div>
+              </div>
+              <div class="evolution-item">
+                <div class="evolution-icon">C</div>
+                <div>
+                  <b>更长期的财务陪伴</b>
+                  <p>储蓄目标追踪和主动提醒，把一次性建议延展成持续行动。</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="roadmap">
+          <article class="roadmap-card">
+            <h3>已完成</h3>
+            <ul class="roadmap-list">
+              <li><span>首页看板、记账、预算、统计、AI 助手</span><span class="status">Done</span></li>
+              <li><span>Supabase 数据持久化与用户系统</span><span class="status">Done</span></li>
+              <li><span>自然语言记账、确认卡片、一键写入</span><span class="status">Done</span></li>
+              <li><span>7-Agent 协作、流式输出、上下文记忆</span><span class="status">Done</span></li>
+              <li><span>Vercel 全功能部署上线</span><span class="status">Done</span></li>
+            </ul>
+          </article>
+          <article class="roadmap-card">
+            <h3>可继续迭代</h3>
+            <ul class="roadmap-list">
+              <li><span>小程序版本，进入微信生态高频入口</span><span class="status next">Next</span></li>
+              <li><span>月度 AI 报告，自动生成财务复盘</span><span class="status next">Next</span></li>
+              <li><span>语音记账，进一步降低输入成本</span><span class="status next">Next</span></li>
+              <li><span>账单导入与截图 OCR，补齐历史数据</span><span class="status next">Next</span></li>
+              <li><span>储蓄目标追踪与主动提醒策略</span><span class="status next">Next</span></li>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="finale">
+      <div class="page-shell">
+        <div class="finale-card">
+          <div>
+            <div class="section-kicker">Project Summary</div>
+            <h2>这个 Vibe Coding 项目验证的是：AI 可以成为个人财务管理的协作者</h2>
+            <p>MoneyMate AI 的价值不只是完成一个全栈应用，而是把 AI 产品经理的思考落到了具体链路里：用户输入尽量自然，系统计算必须确定，AI 建议基于真实数据，风险回答需要合规边界。它从 PRD、交互、数据、Agent 到部署，形成了一个可以真实体验的 AI 财务助手 MVP。</p>
+          </div>
+          <a class="button" href="https://finacewith.vercel.app" target="_blank" rel="noreferrer">打开线上 Demo</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="page-shell">MoneyMate AI · Project showcase generated for portfolio and product review</div>
+  </footer>
+</body>
+</html>
