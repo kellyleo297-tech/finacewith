@@ -122,8 +122,22 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const { data: incData } = await supabase.from('incomes').select('*').eq('user_id', userId).eq('month', month);
       const incomes = (incData || []).map(toIncome);
 
-      // Fetch budgets this month
-      const { data: budData } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('month', month);
+      // Fetch budgets this month — seed defaults if empty
+      let { data: budData } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('month', month);
+      if (!budData || budData.length === 0) {
+        const defaults = [
+          { user_id: userId, category_id: 'cat_food', amount: 1800, month, alert_threshold: 70 },
+          { user_id: userId, category_id: 'cat_transport', amount: 500, month, alert_threshold: 80 },
+          { user_id: userId, category_id: 'cat_entertainment', amount: 600, month, alert_threshold: 70 },
+          { user_id: userId, category_id: 'cat_shopping', amount: 800, month, alert_threshold: 70 },
+          { user_id: userId, category_id: 'cat_learning', amount: 500, month, alert_threshold: 80 },
+          { user_id: userId, category_id: 'cat_social', amount: 400, month, alert_threshold: 70 },
+          { user_id: userId, category_id: 'cat_medical', amount: 300, month, alert_threshold: 80 },
+          { user_id: userId, category_id: 'cat_other', amount: 300, month, alert_threshold: 80 },
+        ];
+        await supabase.from('budgets').insert(defaults);
+        budData = defaults as any;
+      }
       const budgets = (budData || []).map(toBudget);
 
       // Fetch saving goals

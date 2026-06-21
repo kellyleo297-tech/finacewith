@@ -39,13 +39,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) return { error: error.message };
 
-    // Create user profile in users table
+    // Create user profile + seed categories & budgets
     if (data.user) {
-      await supabase.from('users').insert({
-        id: data.user.id,
-        name,
-        email,
-      });
+      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+      await supabase.from('users').insert({ id: data.user.id, name, email });
+
+      // Seed default budgets
+      const defaultBudgets = [
+        { user_id: data.user.id, category_id: 'cat_food', amount: 1800, month },
+        { user_id: data.user.id, category_id: 'cat_transport', amount: 500, month },
+        { user_id: data.user.id, category_id: 'cat_entertainment', amount: 600, month },
+        { user_id: data.user.id, category_id: 'cat_shopping', amount: 800, month },
+        { user_id: data.user.id, category_id: 'cat_learning', amount: 500, month },
+        { user_id: data.user.id, category_id: 'cat_social', amount: 400, month },
+        { user_id: data.user.id, category_id: 'cat_medical', amount: 300, month },
+        { user_id: data.user.id, category_id: 'cat_other', amount: 300, month },
+      ].map(b => ({ ...b, alert_threshold: 70 }));
+      await supabase.from('budgets').insert(defaultBudgets);
     }
     return {};
   }, []);
