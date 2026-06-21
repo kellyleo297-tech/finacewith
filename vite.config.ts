@@ -10,4 +10,15 @@ export default defineConfig({
       ? {}
       : { proxy: { '/api': 'http://localhost:3001' } }),
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id: string) {
+          if (id.includes('node_modules/recharts/')) return 'charts';
+          if (id.includes('node_modules/@supabase/')) return 'supabase';
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) return 'vendor';
+        },
+      },
+    },
+  },
 })
