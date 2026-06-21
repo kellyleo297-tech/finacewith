@@ -180,25 +180,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         'X-Accel-Buffering': 'no',
       });
 
-      let fullText = '';
       try {
+        // Step A: Collect full LLM response (hidden from user)
+        let fullText = '';
         for await (const token of callLLMStream(sysPrompt, message, { temperature: 0.5 })) {
           fullText += token;
-          res.write(`data: ${JSON.stringify({ type: 'token', content: token })}\n\n`);
         }
+
+        // Step B: Parse JSON to extract answer
         const parsed = tryParseJSON(fullText);
         const answer = (parsed?.answer as string) || fullText;
         const records = parsed?.records;
 
+        // Step C: Compliance check (before streaming to user)
+        let finalAnswer = answer;
         let finalAgent = agentLabel;
         if (intent === 'finance_edu' || intent === 'saving') {
           const check = await complianceAgent(answer);
           if (check.status === 'violation' && check.fixedAnswer) {
-            res.write(`data: ${JSON.stringify({ type: 'override', content: check.fixedAnswer })}\n\n`);
-            res.write(`data: ${JSON.stringify({ type: 'done', intent, agentUsed: agentLabel + ' → ⚠️ 风控修正', records })}\n\n`);
-            res.end(); return;
+            finalAnswer = check.fixedAnswer;
+            finalAgent = agentLabel + ' → ⚠️ 风控修正';
           }
         }
+
+        // Step D: Stream the clean answer character by character
+        for (const char of finalAnswer) {
+          res.write(`data: ${JSON.stringify({ type: 'token', content: char })}\n\n`);
+        }
+
+        // Step E: Send done event
         res.write(`data: ${JSON.stringify({ type: 'done', intent, agentUsed: finalAgent, records })}\n\n`);
       } catch (e) {
         res.write(`data: ${JSON.stringify({ type: 'error', content: '生成中断，请重试' })}\n\n`);
