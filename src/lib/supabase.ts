@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL || '',
-  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-);
+// Supabase anon key is safe to expose in client-side code
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://uankoulfoscdnchtzcrz.supabase.co';
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_3_kMqt-XAyrvVv-OAY56gQ_kk3zH1JU';
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export type DbUser = {
   id: string;
