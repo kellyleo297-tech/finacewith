@@ -6,134 +6,135 @@
 <title>MoneyMate AI — 青年 AI 财务助手</title>
 <style>
   :root {
-    --bg: #0a0a0f;
-    --card: #13131a;
-    --border: #1e1e2a;
-    --text: #f1f1f7;
-    --muted: #8b8b9e;
-    --subtle: #555568;
-    --violet: #7c5cfc;
-    --violet2: #a78bfa;
-    --green: #10b981;
-    --amber: #f59e0b;
-    --pink: #ec4899;
+    --bg: #0a0a0f; --card: #13131a; --border: #1e1e2a;
+    --text: #f1f1f7; --muted: #8b8b9e; --subtle: #555568;
+    --violet: #7c5cfc; --violet2: #a78bfa; --green: #10b981; --amber: #f59e0b; --pink: #ec4899;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
-    line-height: 1.7;
-    -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    line-height: 1.7; -webkit-font-smoothing: antialiased; overflow-x: hidden;
   }
-  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 40px; }
 
   /* Navigation */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,15,0.85); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
   }
-  nav .inner { max-width: 960px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; }
-  nav .logo { font-size: 18px; font-weight: 700; color: var(--text); }
+  nav .inner { max-width: 1200px; margin: 0 auto; padding: 16px 40px; display: flex; align-items: center; justify-content: space-between; }
+  nav .logo { font-size: 20px; font-weight: 700; }
   nav .logo span { color: var(--violet); }
-  nav a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 28px; transition: color .2s; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; margin-left: 32px; transition: color .2s; }
   nav a:hover { color: var(--text); }
-  nav .btn { background: var(--violet); color: #fff; padding: 8px 18px; border-radius: 20px; font-weight: 600; }
+  nav .btn { background: var(--violet); color: #fff; padding: 10px 22px; border-radius: 24px; font-weight: 600; font-size: 14px; }
   nav .btn:hover { background: var(--violet2); color: #fff; }
 
   /* Sections */
-  section { padding: 100px 0; }
-  section:first-of-type { padding-top: 160px; }
+  section { padding: 120px 0; }
+  section:first-of-type { padding-top: 180px; }
 
-  .label {
-    display: inline-block; font-size: 13px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--violet2); margin-bottom: 16px;
-  }
-  h2 { font-size: 48px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 24px; line-height: 1.15; }
-  h3 { font-size: 28px; font-weight: 600; margin-bottom: 12px; }
-  .sub { font-size: 19px; color: var(--muted); max-width: 560px; margin-bottom: 40px; line-height: 1.6; }
-  p { color: var(--muted); font-size: 15px; max-width: 600px; }
+  .label { display: inline-block; font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--violet2); margin-bottom: 20px; }
+  h2 { font-size: 64px; font-weight: 700; letter-spacing: -1px; margin-bottom: 28px; line-height: 1.1; }
+  h3 { font-size: 32px; font-weight: 600; margin-bottom: 14px; }
+  .sub { font-size: 21px; color: var(--muted); max-width: 640px; margin-bottom: 0; line-height: 1.6; }
+  p { color: var(--muted); font-size: 16px; }
 
   /* Hero */
   .hero { text-align: center; }
-  .hero h2 { font-size: 64px; max-width: 800px; margin: 0 auto 20px; }
+  .hero h2 { font-size: 80px; max-width: 900px; margin: 0 auto 24px; }
   .hero .gradient { background: linear-gradient(135deg, var(--violet2), var(--pink), var(--violet2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero .sub { margin: 0 auto 32px; }
-  .hero .btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-  .btn-primary { display: inline-block; background: var(--violet); color: #fff; padding: 14px 32px; border-radius: 30px; font-weight: 600; font-size: 16px; text-decoration: none; transition: all .3s; }
-  .btn-primary:hover { background: var(--violet2); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,92,252,0.3); }
-  .btn-outline { display: inline-block; border: 1px solid var(--border); color: var(--text); padding: 14px 32px; border-radius: 30px; font-weight: 600; font-size: 16px; text-decoration: none; transition: all .3s; }
+  .hero .sub { margin: 0 auto 40px; font-size: 22px; max-width: 680px; }
+  .hero .btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { display: inline-block; background: var(--violet); color: #fff; padding: 16px 36px; border-radius: 32px; font-weight: 700; font-size: 17px; text-decoration: none; transition: all .3s; }
+  .btn-primary:hover { background: var(--violet2); transform: translateY(-2px); box-shadow: 0 12px 40px rgba(124,92,252,0.35); }
+  .btn-outline { display: inline-block; border: 1px solid var(--border); color: var(--text); padding: 16px 36px; border-radius: 32px; font-weight: 700; font-size: 17px; text-decoration: none; transition: all .3s; }
   .btn-outline:hover { border-color: var(--violet); background: rgba(124,92,252,0.08); }
 
-  /* Cards grid */
-  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-  .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
-    padding: 32px; transition: all .3s;
+  /* Phone mockup */
+  .phone-mockup {
+    position: relative; width: 280px; flex-shrink: 0;
+    background: #1a1a1e; border: 3px solid #2a2a30; border-radius: 40px;
+    padding: 12px; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
   }
-  .card:hover { border-color: var(--violet); transform: translateY(-4px); box-shadow: 0 16px 48px rgba(124,92,252,0.08); }
-  .card .icon { font-size: 32px; margin-bottom: 16px; display: block; }
-  .card h4 { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
-  .card p { font-size: 14px; color: var(--muted); }
+  .phone-mockup .notch {
+    width: 80px; height: 6px; background: #333; border-radius: 3px;
+    margin: 0 auto 10px;
+  }
+  .phone-mockup img {
+    width: 100%; border-radius: 28px; display: block;
+  }
+  .phone-small { width: 240px; border-radius: 36px; padding: 10px; }
+  .phone-small img { border-radius: 24px; }
 
-  /* Architecture diagram */
-  .arch-box {
-    background: var(--card); border: 1px solid var(--border); border-radius: 20px;
-    padding: 40px; text-align: center; overflow-x: auto;
+  /* Two-column layout */
+  .row { display: flex; align-items: center; gap: 80px; }
+  .row.reverse { flex-direction: row-reverse; }
+  .row .text { flex: 1; min-width: 0; }
+  .row .visual { flex-shrink: 0; display: flex; gap: 24px; align-items: center; }
+
+  /* Cards */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+    padding: 36px; transition: all .3s;
   }
-  .arch-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 12px 0; }
-  .arch-node {
-    background: rgba(124,92,252,0.12); border: 1px solid rgba(124,92,252,0.3);
-    padding: 12px 20px; border-radius: 12px; font-size: 14px; font-weight: 500; white-space: nowrap;
-  }
-  .arch-node.active { background: var(--violet); border-color: var(--violet); font-weight: 700; }
+  .card:hover { border-color: var(--violet); transform: translateY(-4px); }
+  .card .icon { font-size: 36px; margin-bottom: 20px; display: block; }
+  .card h4 { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+  .card p { font-size: 15px; color: var(--muted); }
+
+  /* Architecture */
+  .arch-box { background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 48px; text-align: center; }
+  .arch-row { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+  .arch-node { background: rgba(124,92,252,0.12); border: 1px solid rgba(124,92,252,0.3); padding: 14px 24px; border-radius: 14px; font-size: 15px; font-weight: 600; white-space: nowrap; }
+  .arch-node.active { background: var(--violet); border-color: var(--violet); }
   .arch-node.green { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.3); }
   .arch-node.pink { background: rgba(236,72,153,0.12); border-color: rgba(236,72,153,0.3); }
-  .arch-arrow { color: var(--subtle); font-size: 20px; }
+  .arch-arrow { color: var(--subtle); font-size: 22px; }
 
-  /* Decision cards */
-  .decision { border-left: 3px solid var(--violet); padding-left: 24px; margin-bottom: 32px; }
-  .decision h4 { font-size: 18px; margin-bottom: 6px; }
-  .decision p { font-size: 14px; }
-  .highlight { color: var(--violet2); font-weight: 600; }
+  /* Decision */
+  .decision { border-left: 3px solid var(--violet); padding-left: 28px; margin-bottom: 36px; }
+  .decision h4 { font-size: 20px; margin-bottom: 8px; }
+  .decision p { font-size: 15px; }
+  .highlight { color: var(--violet2); font-weight: 700; }
 
-  /* Tech stack */
-  .tech-grid { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
-  .tech-item {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 20px 28px; text-align: center; min-width: 120px;
-  }
-  .tech-item .name { font-weight: 700; font-size: 15px; display: block; }
-  .tech-item .role { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  /* Tech */
+  .tech-grid { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+  .tech-item { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 24px 32px; text-align: center; min-width: 140px; }
+  .tech-item .name { font-weight: 700; font-size: 16px; display: block; }
+  .tech-item .role { font-size: 13px; color: var(--muted); margin-top: 6px; }
 
-  /* Results stats */
-  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
-  .stat-num { font-size: 42px; font-weight: 800; color: var(--violet2); }
-  .stat-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  /* Stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+  .stat-num { font-size: 52px; font-weight: 800; color: var(--violet2); }
+  .stat-label { font-size: 14px; color: var(--muted); margin-top: 6px; }
 
   /* CTA */
-  .cta { text-align: center; padding: 120px 0; }
-  .cta h2 { font-size: 52px; }
+  .cta { text-align: center; padding: 140px 0; }
+  .cta h2 { font-size: 64px; }
 
   /* Footer */
-  footer { text-align: center; padding: 40px 0; border-top: 1px solid var(--border); color: var(--subtle); font-size: 13px; }
+  footer { text-align: center; padding: 48px 0; border-top: 1px solid var(--border); color: var(--subtle); font-size: 14px; }
   footer a { color: var(--muted); }
 
   /* Animations */
-  .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
+  .fade-in { opacity: 0; transform: translateY(30px); transition: all 0.7s ease; }
   .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-  /* Mobile */
-  @media (max-width: 768px) {
-    h2 { font-size: 32px; }
-    .hero h2 { font-size: 36px; }
+  @media (max-width: 1024px) {
+    .container { padding: 0 24px; }
+    .row { flex-direction: column; gap: 40px; }
+    .row.reverse { flex-direction: column; }
+    .row .visual { justify-content: center; }
+    h2 { font-size: 40px; }
+    .hero h2 { font-size: 48px; }
+    section { padding: 80px 0; }
+    section:first-of-type { padding-top: 140px; }
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .stat-grid { grid-template-columns: repeat(2, 1fr); }
-    section { padding: 60px 0; }
-    section:first-of-type { padding-top: 120px; }
     nav a { display: none; }
     nav .btn { display: inline-block; }
   }
@@ -155,7 +156,7 @@
   </div>
 </nav>
 
-<!-- Hero -->
+<!-- ═══ Hero ═══ -->
 <section class="hero">
   <div class="container">
     <div class="label">AI Product · 2026</div>
@@ -165,17 +166,41 @@
       <a href="https://finacewith.vercel.app" class="btn-primary">在线体验</a>
       <a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">查看源码</a>
     </div>
+    <div style="display:flex;justify-content:center;gap:24px;margin-top:64px">
+      <div class="phone-mockup">
+        <div class="notch"></div>
+        <img src="project-photo/用户注册.png" alt="MoneyMate 注册页面">
+      </div>
+      <div class="phone-mockup">
+        <div class="notch"></div>
+        <img src="project-photo/首页-记录收入.png" alt="MoneyMate 首页看板">
+      </div>
+      <div class="phone-mockup">
+        <div class="notch"></div>
+        <img src="project-photo/记账页-自然语言记账.png" alt="MoneyMate 自然语言记账">
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- 1. 用户洞察 -->
+<!-- ═══ 01 · 用户洞察 ═══ -->
 <section id="insight">
   <div class="container">
-    <div class="label">01 · 用户洞察</div>
-    <h2>传统记账产品<br>只解决了"记录"</h2>
-    <p class="sub">学生和年轻白领每月收入固定，但消费高度碎片化。他们不缺记账工具，缺的是一个能帮他们理解自己财务状况的"人"。</p>
+    <div class="row">
+      <div class="text">
+        <div class="label">01 · 用户洞察</div>
+        <h2>传统记账产品<br>只解决了"记录"</h2>
+        <p class="sub">学生和年轻白领每月收入固定，但消费高度碎片化。他们不缺记账工具，缺的是能帮他们理解财务状况的「人」。</p>
+      </div>
+      <div class="visual">
+        <div class="phone-mockup">
+          <div class="notch"></div>
+          <img src="project-photo/首页-记录收入.png" alt="MoneyMate 首页">
+        </div>
+      </div>
+    </div>
 
-    <div class="grid-3" style="margin-top:40px">
+    <div class="grid-3" style="margin-top:60px">
       <div class="card">
         <span class="icon">📝</span>
         <h4>记了账也看不懂</h4>
@@ -189,49 +214,52 @@
       <div class="card">
         <span class="icon">💸</span>
         <h4>没人告诉你怎么优化</h4>
-        <p>想攒钱但不知道从哪开始。需要一个真正懂你消费习惯、能给出个性化建议的助手。</p>
+        <p>想攒钱但不知道从哪开始。需要一个懂你消费习惯、能给出个性化建议的助手。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 2. AI 架构 -->
+<!-- ═══ 02 · AI 架构 ═══ -->
 <section id="solution">
   <div class="container">
-    <div class="label">02 · AI 能力架构</div>
-    <h2>7 个 Agent 协作<br>不是聊天机器人</h2>
-    <p class="sub">用户侧只感知一个 AI 助手，背后是 Supervisor 调度 → 6 个专业 Agent → 风控审查的完整链路。每个 Agent 各司其职，独立评测，独立优化。</p>
+    <div class="row reverse">
+      <div class="text">
+        <div class="label">02 · AI 能力架构</div>
+        <h2>7 个 Agent 协作<br>不是聊天机器人</h2>
+        <p class="sub">用户侧只感知一个 AI 助手，背后是 Supervisor 调度 → 6 个专业 Agent → 风控审查的完整链路。</p>
+      </div>
+      <div class="visual">
+        <div class="phone-mockup">
+          <div class="notch"></div>
+          <img src="project-photo/ai助手页-回答示例.png" alt="AI 助手回答">
+        </div>
+        <div class="phone-mockup phone-small">
+          <div class="notch"></div>
+          <img src="project-photo/记账页-自然语言记账.png" alt="自然语言记账">
+        </div>
+      </div>
+    </div>
 
     <!-- Architecture flow -->
-    <div class="arch-box" style="margin-top:40px">
-      <div class="arch-row">
-        <span class="arch-node" style="font-size:13px;background:transparent;border-color:var(--subtle);color:var(--muted)">用户输入</span>
-      </div>
+    <div class="arch-box" style="margin-top:48px">
+      <div class="arch-row"><span class="arch-node" style="background:transparent;border-color:var(--subtle);color:var(--muted)">用户输入</span></div>
       <div class="arch-arrow">↓</div>
       <div class="arch-row">
         <span class="arch-node active">Supervisor Agent</span>
-        <span style="font-size:13px;color:var(--muted)">规则层 ~70% + LLM 兜底</span>
+        <span style="font-size:14px;color:var(--muted)">规则层 ~70% + LLM 兜底</span>
       </div>
       <div class="arch-arrow">↓</div>
-      <div class="arch-row" style="gap:8px">
-        <span class="arch-node">📝 记账 Agent</span>
-        <span class="arch-node">📊 消费分析 Agent</span>
-        <span class="arch-node">💡 预算规划 Agent</span>
+      <div class="arch-row" style="gap:10px">
+        <span class="arch-node">📝 记账</span><span class="arch-node">📊 消费分析</span><span class="arch-node">💡 预算规划</span>
       </div>
-      <div class="arch-row" style="gap:8px">
-        <span class="arch-node">🎯 储蓄目标 Agent</span>
-        <span class="arch-node">📖 理财教育 Agent</span>
-        <span class="arch-node">🛒 消费决策 Agent</span>
+      <div class="arch-row" style="gap:10px">
+        <span class="arch-node">🎯 储蓄目标</span><span class="arch-node">📖 理财教育</span><span class="arch-node">🛒 消费决策</span>
       </div>
       <div class="arch-arrow">↓</div>
-      <div class="arch-row">
-        <span class="arch-node pink">🛡️ 风控合规 Agent</span>
-        <span style="font-size:13px;color:var(--muted)">红线拦截 + 黄线警告</span>
-      </div>
+      <div class="arch-row"><span class="arch-node pink">🛡️ 风控合规 Agent</span><span style="font-size:14px;color:var(--muted)">红线拦截 + 黄线警告</span></div>
       <div class="arch-arrow">↓</div>
-      <div class="arch-row">
-        <span class="arch-node green" style="font-size:13px">返回用户</span>
-      </div>
+      <div class="arch-row"><span class="arch-node green">返回用户</span></div>
     </div>
 
     <div class="grid-2" style="margin-top:32px">
@@ -241,48 +269,57 @@
       </div>
       <div class="card">
         <h4>System Prompt 5 要素模板</h4>
-        <p>角色定义 → 能力边界 → 数据注入 → JSON 输出约束 → 安全规则。温度参数按 Agent 职责分层。</p>
+        <p>角色定义 → 能力边界 → 数据注入 → JSON 输出约束 → 安全规则。温度参数按 Agent 职责分层（0.1~0.5）。</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 3. 关键产品决策 -->
+<!-- ═══ 03 · 关键产品决策 ═══ -->
 <section id="decisions">
   <div class="container">
     <div class="label">03 · 关键产品决策</div>
-    <h2>每一个设计选择<br>背后都有明确理由</h2>
-
-    <div class="decision" style="margin-top:40px">
-      <h4><span class="highlight">"代码算账，Agent 解释"</span></h4>
-      <p>金额计算、预算判断、图表数据全部由代码完成。Agent 只引用数据库查询注入的真实数据做自然语言解释。<strong>杜绝 AI 幻觉导致财务数据错误。</strong></p>
+    <div class="row">
+      <div class="text">
+        <h2>每一个设计选择<br>背后都有明确理由</h2>
+      </div>
+      <div class="visual">
+        <div class="phone-mockup">
+          <div class="notch"></div>
+          <img src="project-photo/预算页.png" alt="预算管理">
+        </div>
+      </div>
     </div>
 
-    <div class="decision">
-      <h4><span class="highlight">AI 记账不自动写入，弹确认卡片</span></h4>
-      <p>AI 识别不是 100% 准确的。如果分类错了自动写入 → 用户不知情 → 统计数据污染。<strong>点击确认的成本很低，但避免静默错误的成本很高。</strong>这是一个有意为之的"摩擦设计"。</p>
-    </div>
-
-    <div class="decision">
-      <h4><span class="highlight">首页只回答一个问题："今天还能花多少？"</span></h4>
-      <p>用户打开记账 App 的心理状态不是"我想看财务全景"，而是"我现在还能花多少"。所有模块围绕这一个答案展开：剩余预算 ÷ 剩余天数 = 今日可花。</p>
-    </div>
-
-    <div class="decision">
-      <h4><span class="highlight">7 Agent 架构 vs 一个全能 Agent</span></h4>
-      <p>多 Agent = 每个可独立评测、独立优化。风控 Agent 和其他 Agent 代码零耦合。一个 Agent 出问题，其他不受影响。</p>
+    <div style="margin-top:48px">
+      <div class="decision">
+        <h4><span class="highlight">"代码算账，Agent 解释"</span></h4>
+        <p>金额计算、预算判断、图表数据全部由代码完成。Agent 只引用数据库查询注入的真实数据做自然语言解释。<strong>杜绝 AI 幻觉导致财务数据错误。</strong></p>
+      </div>
+      <div class="decision">
+        <h4><span class="highlight">AI 记账不自动写入，弹确认卡片</span></h4>
+        <p>AI 识别不是 100% 准确的。如果分类错了自动写入 → 用户不知情 → 统计数据污染。<strong>点击确认的成本很低，但避免静默错误的成本很高。</strong>这是一个有意为之的"摩擦设计"。</p>
+      </div>
+      <div class="decision">
+        <h4><span class="highlight">首页只回答一个问题："今天还能花多少？"</span></h4>
+        <p>用户打开记账 App 的心理状态不是"我想看财务全景"，而是"我现在还能花多少"。剩余预算 ÷ 剩余天数 = 今日可花。</p>
+      </div>
+      <div class="decision">
+        <h4><span class="highlight">7 Agent 架构 vs 一个全能 Agent</span></h4>
+        <p>多 Agent = 每个可独立评测、独立优化。风控 Agent 和其他 Agent 代码零耦合。一个 Agent 出问题，其他不受影响。</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- 4. 风控设计 -->
+<!-- ═══ 04 · 风控设计 ═══ -->
 <section id="safety">
   <div class="container">
     <div class="label">04 · 风控设计</div>
     <h2>两层防御<br>一个原则</h2>
-    <p class="sub">财务 AI 最大的风险是用户把它当投资顾问。我们的策略：不允许它变成投资顾问。</p>
+    <p class="sub" style="margin-bottom:48px">财务 AI 最大的风险是用户把它当投资顾问。<br>我们的策略：不允许它变成投资顾问。</p>
 
-    <div class="grid-2" style="margin-top:40px">
+    <div class="grid-2">
       <div class="card">
         <h4>🛡️ 预防层（Prompt 层）</h4>
         <p>理财 Agent 的 System Prompt 内置 <strong>7 条红线</strong>：不推荐股票/基金代码、不承诺收益、不诱导借钱投资、不替用户做投资决策。</p>
@@ -295,32 +332,41 @@
   </div>
 </section>
 
-<!-- 5. 技术架构 -->
+<!-- ═══ 05 · 技术架构 ═══ -->
 <section id="architecture">
   <div class="container">
-    <div class="label">05 · 技术架构</div>
-    <h2>从 PRD 到全栈交付<br>独立完成</h2>
-
-    <div class="arch-box" style="margin-top:40px;text-align:left">
-      <div style="text-align:center">
-        <span style="font-size:13px;color:var(--muted);display:block;margin-bottom:12px">系统架构</span>
-        <div class="arch-row">
-          <span class="arch-node active">React 前端</span>
-          <span style="color:var(--muted)">Vercel 部署</span>
-        </div>
-        <div class="arch-arrow">HTTPS /api/*</div>
-        <div class="arch-row">
-          <span class="arch-node">Express 后端</span>
-          <span style="color:var(--muted)">Railway 部署</span>
-        </div>
-        <div style="display:flex;justify-content:center;gap:32px;margin-top:16px">
-          <span class="arch-node green">Supabase PostgreSQL</span>
-          <span class="arch-node pink">DeepSeek LLM</span>
+    <div class="row reverse">
+      <div class="text">
+        <div class="label">05 · 技术架构</div>
+        <h2>从 PRD 到全栈交付<br>独立完成</h2>
+        <p class="sub">React → Express → Supabase + DeepSeek → Vercel + Railway。传统前后端分离架构，JWT 认证，RESTful API。</p>
+      </div>
+      <div class="visual">
+        <div class="phone-mockup">
+          <div class="notch"></div>
+          <img src="project-photo/ai助手页.png" alt="AI 助手页面">
         </div>
       </div>
     </div>
 
-    <div class="tech-grid" style="margin-top:40px">
+    <div class="arch-box" style="margin-top:48px;text-align:left">
+      <div style="text-align:center">
+        <span style="font-size:14px;color:var(--muted);display:block;margin-bottom:16px">系统架构</span>
+        <div class="arch-row">
+          <span class="arch-node active">React 前端</span><span style="color:var(--muted)">Vercel</span>
+        </div>
+        <div class="arch-arrow">HTTPS /api/*</div>
+        <div class="arch-row">
+          <span class="arch-node">Express 后端</span><span style="color:var(--muted)">Railway</span>
+        </div>
+        <div style="display:flex;justify-content:center;gap:40px;margin-top:20px">
+          <span class="arch-node green">Supabase<br>PostgreSQL</span>
+          <span class="arch-node pink">DeepSeek<br>LLM</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tech-grid" style="margin-top:48px">
       <div class="tech-item"><span class="name">React 19</span><span class="role">前端框架</span></div>
       <div class="tech-item"><span class="name">TypeScript</span><span class="role">类型安全</span></div>
       <div class="tech-item"><span class="name">Tailwind CSS</span><span class="role">样式系统</span></div>
@@ -333,49 +379,37 @@
   </div>
 </section>
 
-<!-- 6. 项目成果 -->
+<!-- ═══ 06 · 项目成果 ═══ -->
 <section id="results">
   <div class="container">
     <div class="label">06 · 项目成果</div>
     <h2>从 0 到 1<br>可在线体验</h2>
 
-    <div class="stat-grid" style="margin-top:40px">
-      <div>
-        <div class="stat-num">7</div>
-        <div class="stat-label">AI Agent 数量</div>
-      </div>
-      <div>
-        <div class="stat-num">7</div>
-        <div class="stat-label">数据库表</div>
-      </div>
-      <div>
-        <div class="stat-num">5+</div>
-        <div class="stat-label">核心页面</div>
-      </div>
-      <div>
-        <div class="stat-num">3</div>
-        <div class="stat-label">平台部署</div>
-      </div>
+    <div class="stat-grid" style="margin-top:48px">
+      <div><div class="stat-num">7</div><div class="stat-label">AI Agent 数量</div></div>
+      <div><div class="stat-num">7</div><div class="stat-label">数据库表</div></div>
+      <div><div class="stat-num">5+</div><div class="stat-label">核心页面</div></div>
+      <div><div class="stat-num">3</div><div class="stat-label">平台部署</div></div>
     </div>
 
-    <div class="grid-2" style="margin-top:32px">
+    <div class="grid-2" style="margin-top:40px">
       <div class="card">
         <h4>🔗 在线访问</h4>
-        <p>finacewith.vercel.app<br>完整的注册 → 记账 → AI 分析闭环</p>
+        <p style="word-break:break-all">finacewith.vercel.app<br>完整的注册 → 记账 → AI 分析闭环</p>
       </div>
       <div class="card">
         <h4>📂 开源代码</h4>
-        <p>github.com/kellyleo297-tech/finacewith<br>含完整 PRD + 技术文档 + 面试手册</p>
+        <p style="word-break:break-all">github.com/kellyleo297-tech/finacewith<br>含完整 PRD + 技术文档 + 面试手册</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
+<!-- ═══ CTA ═══ -->
 <section class="cta">
   <div class="container">
     <h2>从今天开始<br>让 AI 帮你管钱</h2>
-    <p class="sub" style="margin:16px auto 32px">不是记账工具，是你的 AI 财务助手</p>
+    <p class="sub" style="margin:20px auto 40px">不是记账工具，是你的 AI 财务助手</p>
     <div class="btns">
       <a href="https://finacewith.vercel.app" class="btn-primary">立即体验</a>
       <a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">GitHub</a>
@@ -390,13 +424,11 @@
 </footer>
 
 <script>
-  // Scroll fade-in animation
-  const observer = new IntersectionObserver((entries) => {
+  const obs = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.15 });
-  document.querySelectorAll('.card, .decision, .tech-item, .arch-box, .stat-grid > div').forEach(el => {
-    el.classList.add('fade-in');
-    observer.observe(el);
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.card, .decision, .tech-item, .arch-box, .stat-grid>div, .phone-mockup').forEach(el => {
+    el.classList.add('fade-in'); obs.observe(el);
   });
 </script>
 </body>
