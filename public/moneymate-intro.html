@@ -53,17 +53,28 @@
   .btn-outline:hover { border-color: var(--violet); background: rgba(124,92,252,0.08); }
 
   /* Phone mockup */
-  .phone-mockup {
+  /* iPhone mockup */
+  .iphone {
     position: relative; width: 280px; flex-shrink: 0;
-    background: #1a1a1e; border: 3px solid #2a2a30;
-    border-radius: 24px;
-    padding: 28px 12px 12px 12px; box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+    background: #1c1c1e; border-radius: 44px;
+    padding: 10px; box-shadow:
+      0 0 0 3px #3a3a3c,
+      0 0 0 5px #1c1c1e,
+      0 0 0 7px #2a2a2c,
+      0 30px 60px rgba(0,0,0,0.5);
   }
-  .phone-mockup img {
-    width: 100%; border-radius: 16px; display: block;
+  .iphone .dynamic-island {
+    width: 80px; height: 24px; background: #000;
+    border-radius: 14px; margin: 0 auto 10px;
   }
-  .phone-small { width: 240px; border-radius: 22px; padding: 24px 10px 10px 10px; }
-  .phone-small img { border-radius: 14px; }
+  .iphone .screen {
+    border-radius: 34px; overflow: hidden; background: #fff;
+  }
+  .iphone img { width: 100%; display: block; }
+  .iphone-small { width: 230px; border-radius: 38px; padding: 8px; }
+  .iphone-small .dynamic-island { width: 66px; height: 20px; border-radius: 12px; margin-bottom: 8px; }
+  .iphone-small .screen { border-radius: 30px; }
+  .iphone-small img { width: 100%; }
 
   /* Two-column layout */
   .row { display: flex; align-items: center; gap: 80px; }
@@ -164,15 +175,15 @@
       <a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">查看源码</a>
     </div>
     <div style="display:flex;justify-content:center;gap:24px;margin-top:64px">
-      <div class="phone-mockup">
-        <imgsrc="project-photo/用户注册.png" alt="MoneyMate 注册页面">
-      </div>
-      <div class="phone-mockup">
-        <imgsrc="project-photo/首页-记录收入.png" alt="MoneyMate 首页看板">
-      </div>
-      <div class="phone-mockup">
-        <imgsrc="project-photo/记账页-自然语言记账.png" alt="MoneyMate 自然语言记账">
-      </div>
+      <div class="iphone">
+        <div class="dynamic-island"></div>
+        <div class="screen"><imgsrc="project-photo/用户注册.png" alt="MoneyMate 注册页面"></div></div>
+      <div class="iphone">
+        <div class="dynamic-island"></div>
+        <div class="screen"><imgsrc="project-photo/首页-记录收入.png" alt="MoneyMate 首页看板"></div></div>
+      <div class="iphone">
+        <div class="dynamic-island"></div>
+        <div class="screen"><imgsrc="project-photo/记账页-自然语言记账.png" alt="MoneyMate 自然语言记账"></div></div>
     </div>
   </div>
 </section>
@@ -187,7 +198,7 @@
         <p class="sub">学生和年轻白领每月收入固定，但消费高度碎片化。他们不缺记账工具，缺的是能帮他们理解财务状况的「人」。</p>
       </div>
       <div class="visual">
-        <div class="phone-mockup">
+        <div class="iphone">
           <div class="notch"></div>
           <img src="project-photo/首页-记录收入.png" alt="MoneyMate 首页">
         </div>
@@ -224,11 +235,11 @@
         <p class="sub">用户侧只感知一个 AI 助手，背后是 Supervisor 调度 → 6 个专业 Agent → 风控审查的完整链路。</p>
       </div>
       <div class="visual">
-        <div class="phone-mockup">
+        <div class="iphone">
           <div class="notch"></div>
           <img src="project-photo/ai助手页-回答示例.png" alt="AI 助手回答">
         </div>
-        <div class="phone-mockup phone-small">
+        <div class="iphone iphone-small">
           <div class="notch"></div>
           <img src="project-photo/记账页-自然语言记账.png" alt="自然语言记账">
         </div>
@@ -278,7 +289,7 @@
         <h2>每一个设计选择<br>背后都有明确理由</h2>
       </div>
       <div class="visual">
-        <div class="phone-mockup">
+        <div class="iphone">
           <div class="notch"></div>
           <img src="project-photo/预算页.png" alt="预算管理">
         </div>
@@ -336,7 +347,7 @@
         <p class="sub">React → Express → Supabase + DeepSeek → Vercel + Railway。传统前后端分离架构，JWT 认证，RESTful API。</p>
       </div>
       <div class="visual">
-        <div class="phone-mockup">
+        <div class="iphone">
           <div class="notch"></div>
           <img src="project-photo/ai助手页.png" alt="AI 助手页面">
         </div>
