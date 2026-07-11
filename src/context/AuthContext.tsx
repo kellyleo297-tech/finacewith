@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
-import { supabase } from '../lib/supabase';
-import type { User as AuthUser } from '@supabase/supabase-js';
+import { api, setToken, clearToken, getToken } from '../lib/api';
 
-interface AuthState {
-  user: AuthUser | null;
-  session: any;
-  loading: boolean;
+interface AuthUser {
+  id: string;
+  email: string;
+  name: string;
 }
 
 interface AuthContextValue {
@@ -13,70 +12,56 @@ interface AuthContextValue {
   loading: boolean;
   signUp: (email: string, password: string, name: string) => Promise<{ error?: string }>;
   signIn: (email: string, password: string) => Promise<{ error?: string }>;
-  signOut: () => Promise<void>;
+  signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AuthState>({ user: null, session: null, loading: true });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
+  // Check token on mount
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setState({ user: session?.user ?? null, session, loading: false });
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setState(prev => ({ ...prev, user: session?.user ?? null, session }));
-    });
-
-    return () => subscription.unsubscribe();
+    const token = getToken();
+    if (token) {
+      api.auth.me()
+        .then(u => setUser({ id: u.id, email: u.email, name: u.name }))
+        .catch(() => clearToken())
+        .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, name: string) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) return { error: error.message };
-
-    // Create user profile + seed categories & budgets
-    if (data.user) {
-      const month = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-      await supabase.from('users').insert({ id: data.user.id, name, email });
-
-      // Seed default budgets
-      const defaultBudgets = [
-        { user_id: data.user.id, category_id: 'cat_food', amount: 1800, month },
-        { user_id: data.user.id, category_id: 'cat_transport', amount: 500, month },
-        { user_id: data.user.id, category_id: 'cat_entertainment', amount: 600, month },
-        { user_id: data.user.id, category_id: 'cat_shopping', amount: 800, month },
-        { user_id: data.user.id, category_id: 'cat_learning', amount: 500, month },
-        { user_id: data.user.id, category_id: 'cat_social', amount: 400, month },
-        { user_id: data.user.id, category_id: 'cat_medical', amount: 300, month },
-        { user_id: data.user.id, category_id: 'cat_other', amount: 300, month },
-      ].map(b => ({ ...b, alert_threshold: 70 }));
-      await supabase.from('budgets').insert(defaultBudgets);
+    try {
+      const { user: u, token } = await api.auth.register({ email, password, name });
+      setToken(token);
+      setUser(u);
+      return {};
+    } catch (e: any) {
+      return { error: e.message };
     }
-    return {};
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { error: error.message };
-    return {};
+    try {
+      const { user: u, token } = await api.auth.login({ email, password });
+      setToken(token);
+      setUser(u);
+      return {};
+    } catch (e: any) {
+      return { error: e.message };
+    }
   }, []);
 
-  const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+  const signOut = useCallback(() => {
+    clearToken();
+    setUser(null);
   }, []);
 
-  const value = useMemo(() => ({
-    user: state.user,
-    loading: state.loading,
-    signUp,
-    signIn,
-    signOut,
-  }), [state.user, state.loading, signUp, signIn, signOut]);
+  const value = useMemo(() => ({ user, loading, signUp, signIn, signOut }), [user, loading, signUp, signIn, signOut]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

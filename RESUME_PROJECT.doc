@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word">
+<head><meta charset="UTF-8"></head>
+<body style="font-family:PingFang SC,Microsoft YaHei,sans-serif;line-height:2;max-width:720px;margin:40px auto;color:#1e293b;">
+
+<h2 style="font-size:22px;border-bottom:2px solid #6366f1;padding-bottom:8px;">项目经历</h2>
+
+<h3 style="font-size:17px;color:#4f46e5;margin-top:28px;">MoneyMate AI — 青年 AI 财务助手</h3>
+<p style="font-size:14px;color:#64748b;margin-top:-6px;">独立开发 · 2026年6月至今 · 在线体验：finacewith.vercel.app</p>
+
+<p style="font-size:14px;">面向学生和年轻白领的 AI 财务管理应用，通过多 Agent 协作帮助用户完成智能记账、预算管理、消费分析和理财规划。从 PRD 到全栈上线独立完成。</p>
+
+<!-- 用户洞察 -->
+<h3 style="font-size:16px;color:#4f46e5;margin-top:24px;">一、用户洞察</h3>
+<ul style="font-size:14px;margin-top:-4px;">
+  <li>定位 18-28 岁学生和年轻白领，识别核心痛点：<strong>收入固定但消费碎片化</strong>，每月都在"月底没钱了"的循环里</li>
+  <li>区别于传统记账工具只解决"记录"问题，产品核心价值是<strong>回答用户每天打开 App 的第一问题："我今天还能花多少钱？"</strong></li>
+  <li>首页设计围绕单一答案展开：剩余预算 / 剩余天数 = 今日可花，将复杂财务数据翻译成一句人话，降低认知门槛</li>
+  <li>通过用户调研发现：记账产品流失主因不是功能缺失，而是<strong>录入麻烦 + 记了也看不懂</strong>，因此产品重点放在"降低输入成本（自然语言记账）+ 提升理解效率（AI 分析）"</li>
+</ul>
+
+<!-- AI能力 -->
+<h3 style="font-size:16px;color:#4f46e5;margin-top:20px;">二、AI 能力</h3>
+<ul style="font-size:14px;margin-top:-4px;">
+  <li>设计 <strong>7-Agent 协作架构</strong>：Supervisor（意图路由）→ 6 个专业 Agent（记账/消费分析/预算规划/储蓄目标/理财教育/消费决策）→ 风控合规 Agent（安全审查）</li>
+  <li>Supervisor 采用<strong>规则层 + LLM 两层决策</strong>：规则层通过关键词组合匹配覆盖约 70% 高频场景（0ms 延迟、0 token），未命中再走 LLM，兼顾速度与准确</li>
+  <li>System Prompt 设计遵循<strong>5 要素模板</strong>（角色定义 / 能力边界 / 数据注入 / JSON 输出约束 / 安全规则），温度参数按 Agent 职责分层（Supervisor 0.3 / 分析类 0.5 / 风控 0.1）</li>
+  <li>LLM 输出采用结构化 JSON（<code>response_format: json_object</code>），前端自动解析金额、分类、备注，无需人工提取</li>
+  <li>AI 对话支持 <strong>SSE 流式输出</strong>，API 端先收集完整 JSON → 解析后再逐字符推送，用户看到干净的 Markdown 文本流式出现，感知等待从 5 秒降至 1 秒</li>
+  <li>对话支持<strong>上下文记忆</strong>：最近 20 轮对话作为 history 注入 Agent Prompt，AI 可引用之前讨论的内容</li>
+</ul>
+
+<!-- 产品设计 -->
+<h3 style="font-size:16px;color:#4f46e5;margin-top:20px;">三、产品设计</h3>
+<ul style="font-size:14px;margin-top:-4px;">
+  <li>核心设计原则：<strong>"代码负责算账，Agent 负责解释"</strong> — 金额计算、预算判断、图表数据全部由代码完成，Agent 只引用数据库查询注入的真实数据做自然语言解释，杜绝 AI 幻觉导致财务数据错误</li>
+  <li>自然语言记账流程：用户输入 → Agent 提取结构化数据 → <strong>弹出确认卡片</strong> → 用户一键保存。有意加入确认步骤（摩擦设计），避免 AI 识别错误导致的静默数据污染</li>
+  <li>首页看板以"今日建议可花"为核心指标，四个数据卡片（收入/支出/剩余/今日）构成用户 3 秒即可理解的财务快照</li>
+  <li>预算管理支持 10 个分类独立设置，新用户注册<strong>自动创建默认预算</strong>，降低冷启动门槛；预算使用率超 70% 触发系统提醒</li>
+  <li>AI 回复支持 Markdown 渲染（标题/加粗/列表/表格），不是纯文本墙，提升可读性</li>
+</ul>
+
+<!-- 风控设计 -->
+<h3 style="font-size:16px;color:#4f46e5;margin-top:20px;">四、风控设计</h3>
+<ul style="font-size:14px;margin-top:-4px;">
+  <li>构建<strong>两层防御机制</strong>：预防层（理财 Agent Prompt 内置 7 条红线——不推荐股票代码、不承诺收益、不诱导借钱投资等）+ 拦截层（风控 Agent 对理财回答二次审查，违规输出自动修正）</li>
+  <li>风控分级：<strong>红线</strong>（荐股、承诺收益、诱导借钱）直接拦截并修正；<strong>黄线</strong>（缺少风险提示、使用绝对化用语）标记警告并补充</li>
+  <li>所有理财回答<strong>强制包含风险提示</strong>，回答框架遵循"先问应急备用金 → 再判风险偏好 → 再给通用思路 → 最后加风险提示"</li>
+  <li>风控 Agent 对其他 Agent 代码<strong>零耦合</strong>，独立部署、独立评测，即使上游 Agent 出问题也能兜底</li>
+</ul>
+
+<!-- 项目结果 -->
+<h3 style="font-size:16px;color:#4f46e5;margin-top:20px;">五、项目结果</h3>
+<ul style="font-size:14px;margin-top:-4px;">
+  <li>完成从 PRD 到全栈上线的<strong>完整产品交付</strong>：产品需求文档 → React 前端 5 个核心页面 → Supabase 数据库 7 张表 → Vercel Serverless 部署</li>
+  <li>实现<strong>用户认证 → 记账 → 预算管理 → 统计分析 → AI 对话</strong>的产品闭环，线上可直接体验</li>
+  <li>技术栈：React 19 + TypeScript + Tailwind CSS + Recharts + DeepSeek API + Supabase + Vercel</li>
+  <li>线上地址：<strong>finacewith.vercel.app</strong>（前端 + AI 全功能）</li>
+  <li>GitHub：<strong>github.com/kellyleo297-tech/finacewith</strong>（完整源码 + PRD + 技术文档）</li>
+</ul>
+
+</body></html>

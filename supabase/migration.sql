@@ -19,6 +19,9 @@ CREATE TABLE IF NOT EXISTS users (
 -- Add email column if table already exists (for existing deploys)
 ALTER TABLE users ADD COLUMN IF NOT EXISTS email TEXT;
 
+-- Add password_hash column for JWT-based auth (backend v1)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
+
 -- 2. Categories table (default categories per user)
 CREATE TABLE IF NOT EXISTS categories (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

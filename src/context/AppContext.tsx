@@ -1,24 +1,33 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import type { User, Expense, Income, Budget, SavingGoal, Alert, Category, Conversation } from '../types';
-import { supabase, type DbExpense, type DbIncome, type DbBudget, type DbSavingGoal } from '../lib/supabase';
+import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 
 const currentMonth = () => `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
 
-// ── Default categories seeded on user creation ─────────
 const CATEGORY_SEED = [
-  { cat_key: 'cat_food', name: '饮食', type: 'expense', icon: '🍽️', is_default: true },
-  { cat_key: 'cat_transport', name: '交通', type: 'expense', icon: '🚗', is_default: true },
-  { cat_key: 'cat_entertainment', name: '娱乐', type: 'expense', icon: '🎮', is_default: true },
-  { cat_key: 'cat_shopping', name: '购物', type: 'expense', icon: '🛍️', is_default: true },
-  { cat_key: 'cat_learning', name: '学习', type: 'expense', icon: '📚', is_default: true },
-  { cat_key: 'cat_rent', name: '房租', type: 'expense', icon: '🏠', is_default: true },
-  { cat_key: 'cat_medical', name: '医疗', type: 'expense', icon: '💊', is_default: true },
-  { cat_key: 'cat_social', name: '人情社交', type: 'expense', icon: '🎁', is_default: true },
-  { cat_key: 'cat_investment', name: '投资理财', type: 'expense', icon: '📈', is_default: true },
-  { cat_key: 'cat_other', name: '其他', type: 'expense', icon: '📦', is_default: true },
+  { cat_key: 'cat_food', name: '饮食', type: 'expense' as const, icon: '🍽️', is_default: true },
+  { cat_key: 'cat_transport', name: '交通', type: 'expense' as const, icon: '🚗', is_default: true },
+  { cat_key: 'cat_entertainment', name: '娱乐', type: 'expense' as const, icon: '🎮', is_default: true },
+  { cat_key: 'cat_shopping', name: '购物', type: 'expense' as const, icon: '🛍️', is_default: true },
+  { cat_key: 'cat_learning', name: '学习', type: 'expense' as const, icon: '📚', is_default: true },
+  { cat_key: 'cat_rent', name: '房租', type: 'expense' as const, icon: '🏠', is_default: true },
+  { cat_key: 'cat_medical', name: '医疗', type: 'expense' as const, icon: '💊', is_default: true },
+  { cat_key: 'cat_social', name: '人情社交', type: 'expense' as const, icon: '🎁', is_default: true },
+  { cat_key: 'cat_investment', name: '投资理财', type: 'expense' as const, icon: '📈', is_default: true },
+  { cat_key: 'cat_other', name: '其他', type: 'expense' as const, icon: '📦', is_default: true },
 ];
 
+// ── Helpers ────────────────────────────────────────────
+function toExpense(db: any): Expense {
+  return { id: db.id, userId: db.user_id, amount: db.amount, categoryId: db.category_id, note: db.note || '', paymentMethod: db.payment_method || 'wechat', expenseDate: db.expense_date, createdAt: db.created_at };
+}
+function toIncome(db: any): Income {
+  return { id: db.id, userId: db.user_id, amount: db.amount, source: db.source || '', incomeDate: db.income_date, month: db.month, isRecurring: db.is_recurring, note: db.note || '' };
+}
+function toBudget(db: any): Budget {
+  return { id: db.id, userId: db.user_id, categoryId: db.category_id, amount: db.amount, month: db.month, alertThreshold: db.alert_threshold };
+}
 // ── State ──────────────────────────────────────────────
 interface AppState {
   user: User;
@@ -30,7 +39,6 @@ interface AppState {
   categories: Category[];
   conversations: Conversation[];
   loading: boolean;
-  error: string | null;
 }
 
 const emptyUser: User = {
@@ -40,25 +48,10 @@ const emptyUser: User = {
 };
 
 const initialState: AppState = {
-  user: emptyUser,
-  expenses: [], incomes: [], budgets: [], savingGoals: [],
-  alerts: [], categories: CATEGORY_SEED.map(c => ({ id: c.cat_key, name: c.name, type: 'expense' as const, icon: c.icon, isDefault: c.is_default })), conversations: [],
-  loading: true, error: null,
+  user: emptyUser, expenses: [], incomes: [], budgets: [], savingGoals: [],
+  alerts: [], categories: CATEGORY_SEED.map(c => ({ id: c.cat_key, name: c.name, type: c.type, icon: c.icon, isDefault: c.is_default })), conversations: [],
+  loading: true,
 };
-
-// ── Helpers: map DB rows to app types ──────────────────
-function toExpense(db: DbExpense): Expense {
-  return { id: db.id, userId: db.user_id, amount: db.amount, categoryId: db.category_id, note: db.note, paymentMethod: db.payment_method as Expense['paymentMethod'], expenseDate: db.expense_date, createdAt: db.created_at };
-}
-function toIncome(db: DbIncome): Income {
-  return { id: db.id, userId: db.user_id, amount: db.amount, source: db.source, incomeDate: db.income_date, month: db.month, isRecurring: db.is_recurring, note: db.note };
-}
-function toBudget(db: DbBudget): Budget {
-  return { id: db.id, userId: db.user_id, categoryId: db.category_id, amount: db.amount, month: db.month, alertThreshold: db.alert_threshold };
-}
-function toSavingGoal(db: DbSavingGoal): SavingGoal {
-  return { id: db.id, userId: db.user_id, name: db.name, targetAmount: db.target_amount, currentAmount: db.current_amount, deadline: db.deadline, status: db.status as SavingGoal['status'], createdAt: db.created_at };
-}
 
 // ── Context ────────────────────────────────────────────
 interface AppContextValue {
@@ -78,9 +71,7 @@ interface AppContextValue {
   addConversation: (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => Promise<void>;
   markAlertRead: (id: string) => void;
   updateUser: (user: Partial<User>) => void;
-  createUser: (name: string, role: string) => Promise<void>;
-  updateUserProfile: (data: { name?: string; role?: User['role']; monthlyIncome?: number; incomeSource?: string; budgetMode?: User['budgetMode']; savingGoal?: number; isOnboarded?: boolean }) => Promise<void>;
-  loadUserData: (userId: string) => Promise<void>;
+  updateUserProfile: (data: any) => Promise<void>;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -90,109 +81,47 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const month = currentMonth();
   const { user: authUser } = useAuth();
 
-  // ── Load data when auth user changes ─────────────────
   useEffect(() => {
     if (authUser?.id) {
-      loadUserData(authUser.id);
+      loadData();
     } else {
       setState(prev => ({ ...prev, loading: false }));
     }
   }, [authUser?.id]);
 
-  const loadUserData = useCallback(async (userId: string) => {
+  async function loadData() {
     setState(prev => ({ ...prev, loading: true }));
     try {
-      // Fetch user
-      const { data: userData } = await supabase.from('users').select('*').eq('id', userId).single();
-      if (!userData) { setState(prev => ({ ...prev, loading: false })); return; }
+      const [profile, expenses, incomes, budgets] = await Promise.all([
+        api.user.profile().catch(() => null),
+        api.expenses.list().catch(() => []),
+        api.incomes.list().catch(() => []),
+        api.budgets.list().catch(() => []),
+      ]);
 
-      const user: User = {
-        id: userData.id, name: userData.name, role: userData.role,
-        currency: userData.currency, riskLevel: userData.risk_level || '',
-        monthlyIncome: userData.monthly_income, incomeSource: userData.income_source || '',
-        budgetMode: userData.budget_mode || 'balanced', savingGoal: userData.saving_goal || 0,
-        fixedExpenses: [], createdAt: userData.created_at, isOnboarded: true,
-      };
+      const user: User = profile ? {
+        id: profile.id, name: profile.name || '', role: profile.role || 'worker',
+        currency: 'CNY', riskLevel: '', monthlyIncome: profile.monthly_income || 0,
+        incomeSource: profile.income_source || '', budgetMode: profile.budget_mode || 'balanced',
+        savingGoal: profile.saving_goal || 0, fixedExpenses: [], createdAt: profile.created_at || '',
+        isOnboarded: true,
+      } : emptyUser;
 
-      // Fetch expenses this month
-      const { data: expData } = await supabase.from('expenses').select('*').eq('user_id', userId).gte('expense_date', `${month}-01`).order('created_at', { ascending: false });
-      const expenses = (expData || []).map(toExpense);
-
-      // Fetch incomes this month
-      const { data: incData } = await supabase.from('incomes').select('*').eq('user_id', userId).eq('month', month);
-      const incomes = (incData || []).map(toIncome);
-
-      // Fetch budgets this month — seed defaults if empty
-      let { data: budData } = await supabase.from('budgets').select('*').eq('user_id', userId).eq('month', month);
-      if (!budData || budData.length === 0) {
-        const defaults = [
-          { user_id: userId, category_id: 'cat_food', amount: 1800, month, alert_threshold: 70 },
-          { user_id: userId, category_id: 'cat_transport', amount: 500, month, alert_threshold: 80 },
-          { user_id: userId, category_id: 'cat_entertainment', amount: 600, month, alert_threshold: 70 },
-          { user_id: userId, category_id: 'cat_shopping', amount: 800, month, alert_threshold: 70 },
-          { user_id: userId, category_id: 'cat_learning', amount: 500, month, alert_threshold: 80 },
-          { user_id: userId, category_id: 'cat_social', amount: 400, month, alert_threshold: 70 },
-          { user_id: userId, category_id: 'cat_medical', amount: 300, month, alert_threshold: 80 },
-          { user_id: userId, category_id: 'cat_other', amount: 300, month, alert_threshold: 80 },
-        ];
-        await supabase.from('budgets').insert(defaults);
-        budData = defaults as any;
-      }
-      const budgets = (budData || []).map(toBudget);
-
-      // Fetch saving goals
-      const { data: goalData } = await supabase.from('saving_goals').select('*').eq('user_id', userId);
-      const savingGoals = (goalData || []).map(toSavingGoal);
-
-      // Build categories list from seed
-      const categories: Category[] = CATEGORY_SEED.map(c => ({ id: c.cat_key, name: c.name, type: c.type as 'expense', icon: c.icon, isDefault: c.is_default }));
-
-      setState(prev => ({ ...prev, user, expenses, incomes, budgets, savingGoals, categories, loading: false }));
-    } catch (e) {
-      console.error('loadUserData error', e);
-      setState(prev => ({ ...prev, loading: false, error: '加载数据失败' }));
+      setState(prev => ({
+        ...prev, user,
+        expenses: (expenses || []).map(toExpense),
+        incomes: (incomes || []).map(toIncome),
+        budgets: (budgets || []).map(toBudget),
+        savingGoals: [], loading: false,
+      }));
+    } catch {
+      setState(prev => ({ ...prev, loading: false }));
     }
-  }, [month]);
+  }
 
-  const createUser = useCallback(async (name: string, role: string) => {
-    const { data } = await supabase.from('users').insert({ name, role }).select().single();
-    if (data) {
-      localStorage.setItem('moneymate_user_id', data.id);
-      // Seed default categories & budgets
-      const catInserts = CATEGORY_SEED.map(c => ({ user_id: data.id, ...c }));
-      await supabase.from('categories').insert(catInserts);
-      // Seed default budgets
-      const defaultBudgets = [
-        { user_id: data.id, category_id: 'cat_food', amount: 1800, month, alert_threshold: 70 },
-        { user_id: data.id, category_id: 'cat_transport', amount: 500, month, alert_threshold: 80 },
-        { user_id: data.id, category_id: 'cat_entertainment', amount: 600, month, alert_threshold: 70 },
-        { user_id: data.id, category_id: 'cat_shopping', amount: 800, month, alert_threshold: 70 },
-        { user_id: data.id, category_id: 'cat_learning', amount: 500, month, alert_threshold: 80 },
-        { user_id: data.id, category_id: 'cat_social', amount: 400, month, alert_threshold: 70 },
-        { user_id: data.id, category_id: 'cat_medical', amount: 300, month, alert_threshold: 80 },
-        { user_id: data.id, category_id: 'cat_other', amount: 300, month, alert_threshold: 80 },
-      ];
-      await supabase.from('budgets').insert(defaultBudgets);
-      await loadUserData(data.id);
-    }
-  }, [month, loadUserData]);
-
-  const updateUserProfile = useCallback(async (data: { name?: string; role?: User['role']; monthlyIncome?: number; incomeSource?: string; budgetMode?: User['budgetMode']; savingGoal?: number; isOnboarded?: boolean }) => {
-    if (!authUser?.id) return;
-    const updates: Record<string, unknown> = {};
-    if (data.name) updates.name = data.name;
-    if (data.role) updates.role = data.role;
-    if (data.monthlyIncome !== undefined) updates.monthly_income = data.monthlyIncome;
-    if (data.incomeSource) updates.income_source = data.incomeSource;
-    if (data.budgetMode) updates.budget_mode = data.budgetMode;
-    if (data.savingGoal !== undefined) updates.saving_goal = data.savingGoal;
-    await supabase.from('users').update(updates).eq('id', authUser.id);
-    setState(prev => ({ ...prev, user: { ...prev.user, ...data as Partial<User>, isOnboarded: data.isOnboarded ?? prev.user.isOnboarded } }));
-  }, [authUser?.id]);
-
-  // ── Computed values ──────────────────────────────────
+  // ── Computed ─────────────────────────────────────────
   const monthlyIncome = useMemo(() => state.incomes.reduce((s, i) => s + i.amount, 0) || state.user.monthlyIncome, [state.incomes, state.user.monthlyIncome]);
-  const monthlyExpenses = useMemo(() => state.expenses.filter(e => e.expenseDate.startsWith(month)).reduce((s, e) => s + e.amount, 0), [state.expenses, month]);
+  const monthlyExpenses = useMemo(() => state.expenses.filter(e => e.expenseDate?.startsWith(month)).reduce((s, e) => s + e.amount, 0), [state.expenses, month]);
   const totalBudget = useMemo(() => state.budgets.reduce((s, b) => s + b.amount, 0), [state.budgets]);
   const remainingBudget = totalBudget - monthlyExpenses;
   const todaySuggested = useMemo(() => Math.max(0, Math.round(remainingBudget / Math.max(1, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate() - new Date().getDate()))), [remainingBudget]);
@@ -203,7 +132,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const categorySpending = useMemo(() => {
     const map = new Map<string, number>();
-    state.expenses.filter(e => e.expenseDate.startsWith(month)).forEach(e => map.set(e.categoryId, (map.get(e.categoryId) || 0) + e.amount));
+    state.expenses.filter(e => e.expenseDate?.startsWith(month)).forEach(e => map.set(e.categoryId, (map.get(e.categoryId) || 0) + e.amount));
     return map;
   }, [state.expenses, month]);
 
@@ -218,60 +147,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ── Actions ──────────────────────────────────────────
   const addExpense = useCallback(async (exp: Omit<Expense, 'id' | 'userId' | 'createdAt'>) => {
-    const { data } = await supabase.from('expenses').insert({
-      user_id: state.user.id, amount: exp.amount, category_id: exp.categoryId,
-      note: exp.note, payment_method: exp.paymentMethod, expense_date: exp.expenseDate,
-    }).select().single();
-    if (data) setState(prev => ({ ...prev, expenses: [toExpense(data), ...prev.expenses] }));
-  }, [state.user.id]);
+    const data = await api.expenses.create({ amount: exp.amount, category_id: exp.categoryId, note: exp.note, payment_method: exp.paymentMethod, expense_date: exp.expenseDate });
+    setState(prev => ({ ...prev, expenses: [toExpense(data), ...prev.expenses] }));
+  }, []);
 
   const addMultipleExpenses = useCallback(async (expenses: Omit<Expense, 'id' | 'userId' | 'createdAt'>[]) => {
-    const rows = expenses.map(e => ({
-      user_id: state.user.id, amount: e.amount, category_id: e.categoryId,
-      note: e.note, payment_method: e.paymentMethod, expense_date: e.expenseDate,
-    }));
-    const { data } = await supabase.from('expenses').insert(rows).select();
-    if (data) setState(prev => ({ ...prev, expenses: [...data.map(toExpense), ...prev.expenses] }));
-  }, [state.user.id]);
+    const data = await api.expenses.batchCreate(expenses.map(e => ({ amount: e.amount, category_id: e.categoryId, note: e.note, payment_method: e.paymentMethod, expense_date: e.expenseDate })));
+    setState(prev => ({ ...prev, expenses: [...data.map(toExpense), ...prev.expenses] }));
+  }, []);
 
   const addIncome = useCallback(async (inc: Omit<Income, 'id' | 'userId'>) => {
-    const { data } = await supabase.from('incomes').insert({
-      user_id: state.user.id, amount: inc.amount, source: inc.source,
-      income_date: inc.incomeDate, month: inc.month, is_recurring: inc.isRecurring, note: inc.note,
-    }).select().single();
-    if (data) {
-      setState(prev => ({ ...prev, incomes: [...prev.incomes, toIncome(data)] }));
-      // Also update user's monthly_income field
-      await supabase.from('users').update({ monthly_income: Number(data.amount) }).eq('id', state.user.id);
-    }
-  }, [state.user.id]);
+    const data = await api.incomes.create({ amount: inc.amount, source: inc.source, income_date: inc.incomeDate, is_recurring: inc.isRecurring, note: inc.note });
+    setState(prev => ({ ...prev, incomes: [...prev.incomes, toIncome(data)] }));
+  }, []);
 
   const deleteExpense = useCallback(async (id: string) => {
-    await supabase.from('expenses').delete().eq('id', id);
+    await api.expenses.delete(id);
     setState(prev => ({ ...prev, expenses: prev.expenses.filter(e => e.id !== id) }));
   }, []);
 
   const updateBudget = useCallback(async (categoryId: string, amount: number, alertThreshold?: number) => {
-    const existing = state.budgets.find(b => b.categoryId === categoryId && b.month === month);
-    if (existing) {
-      await supabase.from('budgets').update({ amount, alert_threshold: alertThreshold ?? existing.alertThreshold }).eq('id', existing.id);
-    } else {
-      await supabase.from('budgets').insert({ user_id: state.user.id, category_id: categoryId, amount, month, alert_threshold: alertThreshold ?? 70 });
-    }
-    setState(prev => ({
-      ...prev,
-      budgets: prev.budgets.map(b => b.categoryId === categoryId ? { ...b, amount, alertThreshold: alertThreshold ?? b.alertThreshold } : b),
-    }));
-  }, [state.user.id, state.budgets, month]);
+    await api.budgets.update(categoryId, { amount, alert_threshold: alertThreshold ?? 70 });
+    setState(prev => ({ ...prev, budgets: prev.budgets.map(b => b.categoryId === categoryId ? { ...b, amount, alertThreshold: alertThreshold ?? b.alertThreshold } : b) }));
+  }, []);
 
   const addConversation = useCallback(async (question: string, answer: string, intent: Conversation['intent'], agentUsed: string) => {
-    const { data } = await supabase.from('conversations').insert({
-      user_id: state.user.id, question, answer, intent, agent_used: agentUsed,
-    }).select().single();
-    if (data) {
-      setState(prev => ({ ...prev, conversations: [...prev.conversations, { id: data.id, userId: data.user_id, question: data.question, answer: data.answer, intent: data.intent, agentUsed: data.agent_used, createdAt: data.created_at }] }));
-    }
-  }, [state.user.id]);
+    setState(prev => ({ ...prev, conversations: [...prev.conversations, { id: String(Date.now()), userId: authUser?.id || '', question, answer, intent, agentUsed, createdAt: new Date().toISOString() }] }));
+  }, [authUser?.id]);
 
   const markAlertRead = useCallback((id: string) => {
     setState(prev => ({ ...prev, alerts: prev.alerts.map(a => a.id === id ? { ...a, read: true } : a) }));
@@ -281,12 +183,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState(prev => ({ ...prev, user: { ...prev.user, ..._user } }));
   }, []);
 
+  const updateUserProfile = useCallback(async (data: any) => {
+    await api.user.update(data);
+    setState(prev => ({ ...prev, user: { ...prev.user, ...data } }));
+  }, []);
+
   const value = useMemo(() => ({
     state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested,
     savingProgress, categoryBudgetUsage, totalBudget,
     addExpense, addMultipleExpenses, addIncome, deleteExpense, updateBudget,
-    addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData,
-  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, addIncome, deleteExpense, updateBudget, addConversation, markAlertRead, updateUser, createUser, updateUserProfile, loadUserData]);
+    addConversation, markAlertRead, updateUser, updateUserProfile,
+  }), [state, monthlyIncome, monthlyExpenses, remainingBudget, todaySuggested, savingProgress, categoryBudgetUsage, totalBudget, addExpense, addMultipleExpenses, addIncome, deleteExpense, updateBudget, addConversation, updateUserProfile]);
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }

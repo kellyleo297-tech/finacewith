@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Send, Bot, User, Loader2, Check, Sparkles, Clock, Trash2, ChevronLeft } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
+import { api } from '../lib/api';
 import { marked } from 'marked';
 
 // Configure marked for safe rendering
@@ -50,26 +50,16 @@ export default function AIAssistant() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  // Load past conversations from Supabase
+  // Conversation history loaded from state (accumulated during session)
   useEffect(() => {
     if (!authUser?.id) return;
-    supabase
-      .from('conversations')
-      .select('id, question, created_at')
-      .eq('user_id', authUser.id)
-      .order('created_at', { ascending: false })
-      .limit(50)
-      .then(({ data }) => {
-        if (data) {
-          const sessions: ChatSession[] = data.map((d: any) => ({
-            id: d.id,
-            title: d.question.slice(0, 30) + (d.question.length > 30 ? '...' : ''),
-            createdAt: d.created_at,
-          }));
-          setHistory(sessions);
-        }
-      });
-  }, [authUser?.id, messages.length]);
+    const sessions: ChatSession[] = state.conversations.map((c: any) => ({
+      id: c.id || String(Date.now()),
+      title: (c.question || '').slice(0, 30) + ((c.question || '').length > 30 ? '...' : ''),
+      createdAt: c.createdAt || '',
+    }));
+    setHistory(sessions);
+  }, [authUser?.id, state.conversations]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -103,69 +93,21 @@ export default function AIAssistant() {
 
     try {
       const conversationContext = buildContext();
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: question,
-          stream: true,
-          userId: authUser?.id,
-          history: conversationContext,
-        }),
-        signal: controller.signal,
-      });
+      // Call backend API (non-streaming for simplicity in v1)
+      const result = await api.ai.chat(question, conversationContext);
 
-      if (!res.ok) throw new Error('API error');
-
-      const reader = res.body?.getReader();
-      if (!reader) throw new Error('No stream');
-
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let finalIntent = '';
-      let finalAgent = '';
-      let finalRecords: Message['records'];
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const data = line.slice(6);
-          if (!data.trim()) continue;
-
-          try {
-            const event = JSON.parse(data);
-            if (event.type === 'token') {
-              setMessages(prev => {
-                const updated = [...prev];
-                const lastIdx = updated.length - 1;
-                if (updated[lastIdx]?.role === 'assistant') {
-                  updated[lastIdx] = { ...updated[lastIdx], content: updated[lastIdx].content + event.content };
-                }
-                return updated;
-              });
-            } else if (event.type === 'override') {
-              setMessages(prev => {
-                const updated = [...prev];
-                const lastIdx = updated.length - 1;
-                if (updated[lastIdx]?.role === 'assistant') {
-                  updated[lastIdx] = { ...updated[lastIdx], content: event.content };
-                }
-                return updated;
-              });
-            } else if (event.type === 'done') {
-              finalIntent = event.intent;
-              finalAgent = event.agentUsed;
-              finalRecords = event.records;
-            }
-          } catch { /* skip */ }
-        }
+      // Simulate streaming: push content character by character
+      for await (const char of result.answer) {
+        if (controller.signal.aborted) break;
+        setMessages(prev => {
+          const updated = [...prev];
+          const lastIdx = updated.length - 1;
+          if (updated[lastIdx]?.role === 'assistant') {
+            updated[lastIdx] = { ...updated[lastIdx], content: updated[lastIdx].content + char };
+          }
+          return updated;
+        });
+        await new Promise(r => setTimeout(r, 15));
       }
 
       setMessages(prev => {
@@ -174,16 +116,16 @@ export default function AIAssistant() {
         if (updated[lastIdx]?.role === 'assistant') {
           updated[lastIdx] = {
             ...updated[lastIdx],
-            agentUsed: finalAgent || 'Agent',
-            intent: finalIntent,
-            records: finalRecords,
+            agentUsed: result.agentUsed,
+            intent: result.intent,
+            records: result.records,
           };
         }
         return updated;
       });
 
-      if (finalIntent) {
-        addConversation(question, messages[messages.length - 1]?.content || '', finalIntent as Conversation['intent'], finalAgent || 'Agent');
+      if (result.intent) {
+        addConversation(question, result.answer, result.intent as Conversation['intent'], result.agentUsed || 'Agent');
       }
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
