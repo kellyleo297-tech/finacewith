@@ -13,7 +13,10 @@ const COLORS = [
 
 export default function Statistics() {
   const { state, monthlyExpenses } = useApp();
-  const currentMonth = '2026-06';
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const currentMonthPrefix = `${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   // Category pie data
   const categoryPieData = useMemo(() => {
@@ -34,8 +37,8 @@ export default function Statistics() {
   // Daily expense line data
   const dailyData = useMemo(() => {
     const days: Record<string, number> = {};
-    for (let i = 1; i <= 12; i++) {
-      days[`06-${String(i).padStart(2, '0')}`] = 0;
+    for (let i = 1; i <= daysInMonth; i++) {
+      days[`${currentMonthPrefix}-${String(i).padStart(2, '0')}`] = 0;
     }
     state.expenses
       .filter(e => e.expenseDate.startsWith(currentMonth))
@@ -44,7 +47,7 @@ export default function Statistics() {
         days[day] = (days[day] || 0) + e.amount;
       });
     return Object.entries(days).map(([date, amount]) => ({ date, amount }));
-  }, [state.expenses, currentMonth]);
+  }, [state.expenses, currentMonth, currentMonthPrefix, daysInMonth]);
 
   // Fixed vs Flexible
   const fixedCategories = ['cat_rent'];
