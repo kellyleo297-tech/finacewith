@@ -163,6 +163,143 @@ npm run dev
 
 ---
 
+## 📡 API 接口文档
+
+所有接口前缀 `/api`，除 `/api/auth/*` 和 `/api/health` 外均需 `Authorization: Bearer <token>`。
+
+### 认证
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/auth/register` | 注册 `{ email, password, name }` → `{ user, token }` |
+| POST | `/api/auth/login` | 登录 `{ email, password }` → `{ user, token }` |
+
+### 用户
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/user/profile` | 获取用户信息 |
+| PUT | `/api/user/profile` | 更新 `{ name, monthly_income, income_source, budget_mode, saving_goal }` |
+
+### 支出
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/expenses` | 获取当月支出列表 |
+| POST | `/api/expenses` | 创建支出 `{ amount, category_id, note, payment_method, expense_date }` |
+| POST | `/api/expenses/batch` | 批量创建 `{ expenses: [...] }` |
+| DELETE | `/api/expenses/:id` | 删除支出 |
+
+### 收入
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/incomes` | 获取收入列表 |
+| POST | `/api/incomes` | 创建收入 `{ amount, source, income_date, is_recurring, note }` |
+
+### 预算
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/budgets` | 获取当月预算 |
+| PUT | `/api/budgets/:categoryId` | 更新预算 `{ amount, alert_threshold }` |
+
+### AI
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/ai/chat` | AI 对话 `{ message, history? }` → `{ answer, intent, agentUsed, records? }` |
+
+### 健康检查
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/health` | `{ status: "ok", timestamp }` |
+
+---
+
+## 🧠 AI Agent 调度流程
+
+```
+用户输入
+    │
+    ▼
+┌─────────────────────────────┐
+│  Supervisor Agent（调度中心）│
+│  ┌──────────┬────────────┐  │
+│  │ 规则层    │  LLM 兜底  │  │
+│  │ ~70% 命中 │  ~30% 场景 │  │
+│  │ 0ms 延迟  │  JSON 输出 │  │
+│  └──────────┴────────────┘  │
+└─────────────┬───────────────┘
+              │ intent
+              ▼
+┌─────────────────────────────┐
+│  专业 Agent（6 个）          │
+│  ┌────┬────┬────┬────────┐  │
+│  │记账│分析│预算│储蓄·教育│  │
+│  └────┴────┴────┴────────┘  │
+│  每个 Agent 独立 System Prompt│
+│  注入用户真实财务数据         │
+└─────────────┬───────────────┘
+              │ answer
+              ▼
+┌─────────────────────────────┐
+│  风控合规 Agent（仅理财类）  │
+│  🚫 红线：拒绝 + 安全提示    │
+│  ⚠️ 黄线：通过 + 风险标注    │
+└─────────────┬───────────────┘
+              │
+              ▼
+         返回用户 ✅
+```
+
+**关键设计决策：**
+
+| 决策 | 说明 |
+|------|------|
+| 规则层优先 | 关键词组合匹配覆盖 ~70% 高频意图，0 token 消耗 |
+| LLM 兜底 | 规则层未命中时，调用 DeepSeek 做意图分类（temperature 0.3） |
+| 财务数据注入 | 每个 Agent Prompt 注入当月真实收支数据，不靠 Agent 记忆 |
+| JSON 强制输出 | `response_format: json_object`，`tryParseJSON` 容错解析 |
+| 风控后置 | 仅理财教育 + 储蓄目标类输出走风控审查，不影响记账/分析速度 |
+
+---
+
+## 🗄 数据库设计
+
+PostgreSQL（Supabase），7 张表，RLS 行级安全。
+
+```sql
+users               expenses            budgets
+───────────         ───────────         ─────────────
+id UUID PK          id UUID PK          id UUID PK
+email TEXT          user_id FK          user_id FK
+name TEXT           amount NUMERIC      category_id TEXT
+password_hash TEXT  category_id TEXT    amount NUMERIC
+monthly_income      note TEXT           month TEXT
+income_source       payment_method      alert_threshold
+budget_mode         expense_date DATE
+saving_goal         created_at
+
+incomes             saving_goals        conversations
+───────────         ─────────────       ─────────────
+id UUID PK          id UUID PK          id UUID PK
+user_id FK          user_id FK          user_id FK
+amount NUMERIC      name TEXT           question TEXT
+source TEXT         target_amount       answer TEXT
+income_date DATE    current_amount      intent TEXT
+month TEXT          deadline DATE       agent_used TEXT
+is_recurring BOOL   status TEXT         created_at
+```
+
+**安全策略：**
+- 所有表启用 RLS，用户只能访问自己的数据
+- 密码 bcrypt 哈希存储，JWT 30 天过期
+- 前端不直接访问 Supabase，所有数据库操作走后端 API
+
+---
+
 ## 📂 项目结构
 
 ```
