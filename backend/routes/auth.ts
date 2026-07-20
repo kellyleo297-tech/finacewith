@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { db } from '../db.js';
-import { generateToken } from '../middleware/auth.js';
+import { generateToken, verifyToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -90,13 +90,8 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // GET /api/auth/me — get current user
-router.get('/me', async (req: Request, res: Response) => {
-  // middleware attaches userId
+router.get('/me', verifyToken, async (req: Request, res: Response) => {
   const userId = (req as any).userId;
-  if (!userId) {
-    res.status(401).json({ error: '未登录' });
-    return;
-  }
   const { data: user } = await db.from('users').select('id, email, name, monthly_income, income_source, budget_mode, saving_goal, created_at').eq('id', userId).single();
   res.json(user);
 });
