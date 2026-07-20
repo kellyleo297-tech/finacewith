@@ -27,6 +27,10 @@ dist-ssr
 .env
 .env.local
 
+# Tauri
+src-tauri/target
+src-tauri/icons/icon-*.png.bak
+
 # Local documents
 INTERVIEW_QA.md
 INTERVIEW_QA.doc
