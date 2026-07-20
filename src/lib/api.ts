@@ -1,4 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '/api' : 'https://finacewith-production.up.railway.app/api');
+// Dev: Vite proxies /api → localhost:3001
+// Vercel: /api → serverless function (same domain)
+// Tauri: set VITE_API_URL=https://finacewith.vercel.app/api
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // ── Token management ──────────────────────────────────
 let authToken = localStorage.getItem('moneymate_token') || '';
