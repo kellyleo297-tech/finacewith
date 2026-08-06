@@ -25,6 +25,8 @@
   .btn-primary:hover { background:var(--violet2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,92,252,0.35) }
   .btn-outline { display:inline-block;border:1px solid var(--border);color:var(--text);padding:16px 36px;border-radius:32px;font-weight:700;font-size:17px;text-decoration:none;transition:all .3s }
   .btn-outline:hover { border-color:var(--violet);background:rgba(124,92,252,0.08) }
+.btn-download { display:inline-block;background:rgba(124,92,252,0.15);color:var(--violet2);padding:16px 36px;border-radius:32px;font-weight:700;font-size:17px;text-decoration:none;transition:all .3s }
+.btn-download:hover { background:rgba(124,92,252,0.25);transform:translateY(-2px);box-shadow:0 12px 40px rgba(124,92,252,0.15) }
   .btns { display:flex;gap:16px;justify-content:center;flex-wrap:wrap }
   .iphone { width:270px;flex-shrink:0;background:#0d0d10;border-radius:36px;padding:8px;box-shadow:0 24px 56px rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08) }
   .iphone .island { width:72px;height:24px;background:#000;border-radius:12px;margin:6px auto 10px }
@@ -67,7 +69,7 @@
 <div class="label">AI Product · 2026</div>
 <h2>面向年轻人的<br><span class="gradient">AI 财务助手</span></h2>
 <p class="sub">不是记账工具。7 个 AI Agent 协作，帮你理解每一笔消费，规划每一个目标。</p>
-<div class="btns"><a href="https://finacewith.vercel.app" class="btn-primary">在线体验</a><a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">查看源码</a></div>
+<div class="btns"><a href="https://finacewith.vercel.app" class="btn-primary">在线体验</a><a href="https://github.com/kellyleo297-tech/finacewith/releases/latest" class="btn-download">⬇ macOS 版</a><a href="https://github.com/kellyleo297-tech/finacewith/releases/latest" class="btn-download">🪟 Windows 版</a><a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">查看源码</a></div>
 <div class="phones-row">
   <div class="iphone"><div class="screen"><img src="project-photo/用户注册.png" alt="注册页"></div></div>
   <div class="iphone"><div class="screen"><img src="project-photo/首页-记录收入.png" alt="首页"></div></div>
@@ -144,18 +146,18 @@
 <!-- 05 技术架构 -->
 <section id="architecture"><div class="container">
 <div class="row reverse">
-  <div class="text"><div class="label">05 · 技术架构</div><h2>从 PRD 到全栈交付<br>独立完成</h2><p class="sub">React → Express → Supabase + DeepSeek → Vercel + Railway。传统前后端分离架构，JWT 认证，RESTful API。</p></div>
+  <div class="text"><div class="label">05 · 技术架构</div><h2>从 PRD 到全栈交付<br>独立完成</h2><p class="sub">React → Express → Supabase + DeepSeek → Vercel Serverless。JWT 认证，RESTful API，前后端同域。支持 PWA 安装 + Tauri 原生桌面端（6.6MB）。</p></div>
   <div class="visual"><div class="iphone"><div class="screen"><img src="project-photo/ai助手页.png" alt="AI助手"></div></div></div>
 </div>
 <div class="arch-box" style="margin-top:48px;text-align:center">
   <span style="font-size:14px;color:var(--muted);display:block;margin-bottom:16px">系统架构</span>
   <div class="arch-row"><span class="arch-node active">React 前端</span><span style="color:var(--muted)">Vercel</span></div>
   <div class="arch-arrow">HTTPS /api/*</div>
-  <div class="arch-row"><span class="arch-node">Express 后端</span><span style="color:var(--muted)">Railway</span></div>
+  <div class="arch-row"><span class="arch-node">Express 后端</span><span style="color:var(--muted)">Vercel Serverless</span></div>
   <div style="display:flex;justify-content:center;gap:40px;margin-top:20px"><span class="arch-node green">Supabase PostgreSQL</span><span class="arch-node pink">DeepSeek LLM</span></div>
 </div>
 <div class="tech-grid" style="margin-top:48px">
-  <div class="tech-item"><span class="name">React 19</span><span class="role">前端框架</span></div><div class="tech-item"><span class="name">TypeScript</span><span class="role">类型安全</span></div><div class="tech-item"><span class="name">Tailwind CSS</span><span class="role">样式系统</span></div><div class="tech-item"><span class="name">Express 5</span><span class="role">后端框架</span></div><div class="tech-item"><span class="name">JWT + bcrypt</span><span class="role">认证鉴权</span></div><div class="tech-item"><span class="name">Supabase</span><span class="role">数据库</span></div><div class="tech-item"><span class="name">DeepSeek API</span><span class="role">AI 引擎</span></div><div class="tech-item"><span class="name">Recharts</span><span class="role">数据可视化</span></div>
+  <div class="tech-item"><span class="name">React 19</span><span class="role">前端框架</span></div><div class="tech-item"><span class="name">TypeScript</span><span class="role">类型安全</span></div><div class="tech-item"><span class="name">Tailwind CSS</span><span class="role">样式系统</span></div><div class="tech-item"><span class="name">Express 5</span><span class="role">后端框架</span></div><div class="tech-item"><span class="name">JWT + bcrypt</span><span class="role">认证鉴权</span></div><div class="tech-item"><span class="name">Supabase</span><span class="role">数据库</span></div><div class="tech-item"><span class="name">DeepSeek API</span><span class="role">AI 引擎</span></div><div class="tech-item"><span class="name">Recharts</span><span class="role">数据可视化</span></div><div class="tech-item"><span class="name">Vite 8</span><span class="role">构建工具</span></div><div class="tech-item"><span class="name">PWA</span><span class="role">离线安装</span></div><div class="tech-item"><span class="name">Tauri 2</span><span class="role">桌面端</span></div>
 </div>
 </div></section>
 
@@ -164,11 +166,11 @@
 <div class="label">06 · 项目成果</div>
 <h2>从 0 到 1<br>可在线体验</h2>
 <div class="stat-grid" style="margin-top:48px">
-  <div><div class="stat-num">7</div><div class="stat-label">AI Agent 数量</div></div><div><div class="stat-num">7</div><div class="stat-label">数据库表</div></div><div><div class="stat-num">5+</div><div class="stat-label">核心页面</div></div><div><div class="stat-num">3</div><div class="stat-label">平台部署</div></div>
+  <div><div class="stat-num">7</div><div class="stat-label">AI Agent 数量</div></div><div><div class="stat-num">7</div><div class="stat-label">数据库表</div></div><div><div class="stat-num">5+</div><div class="stat-label">核心页面</div></div><div><div class="stat-num">4</div><div class="stat-label">部署形态</div></div>
 </div>
 <div class="grid-2" style="margin-top:40px">
-  <div class="card"><h4>🔗 在线访问</h4><p>finacewith.vercel.app<br>完整的注册 → 记账 → AI 分析闭环</p></div>
-  <div class="card"><h4>📂 开源代码</h4><p>github.com/kellyleo297-tech/finacewith<br>含完整 PRD + 技术文档 + 面试手册</p></div>
+  <div class="card"><h4>🌐 Web + PWA</h4><p>finacewith.vercel.app<br>打开即用，Chrome 地址栏一键安装为桌面应用</p></div>
+  <div class="card"><h4>🖥 macOS 桌面端</h4><p>Tauri 原生应用 6.6MB<br>独立窗口，系统 WebView 运行，.dmg 拖拽安装</p></div>
 </div>
 </div></section>
 
@@ -176,7 +178,7 @@
 <section class="cta"><div class="container">
 <h2>从今天开始<br>让 AI 帮你管钱</h2>
 <p class="sub" style="margin:20px auto 40px">不是记账工具，是你的 AI 财务助手</p>
-<div class="btns"><a href="https://finacewith.vercel.app" class="btn-primary">立即体验</a><a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">GitHub</a></div>
+<div class="btns"><a href="https://finacewith.vercel.app" class="btn-primary">立即体验</a><a href="https://github.com/kellyleo297-tech/finacewith/releases/latest" class="btn-download">⬇ macOS 版</a><a href="https://github.com/kellyleo297-tech/finacewith/releases/latest" class="btn-download">🪟 Windows 版</a><a href="https://github.com/kellyleo297-tech/finacewith" class="btn-outline">GitHub</a></div>
 </div></section>
 
 <footer><div class="container"><p>© 2026 MoneyMate AI · 由 <a href="https://github.com/kellyleo297-tech">Kellyleo</a> 独立设计开发</p></div></footer>
